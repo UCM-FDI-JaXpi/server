@@ -8,20 +8,20 @@ const url = 'http://localhost:3000/traza-jaxpi';
 
 // Traza de ejemplo a enviar
 const trazajaxpi = {
-	actor: {
-		name: 'John Doe',
-		mbox: 'john.doe@example.com',
-	  },
-	  verb: {
-		id: 'http://example.com/verbs/completed',
-		display: { 'en-US': 'completed' },
-	  },
-	  object: {
-		id: 'http://example.com/activities/example-activity',
-		definition: {
-		  name: { 'en-US': 'Example Activity' },
-		},
-	  },
+	"actor": {
+	  "name": "John Doe",
+	  "mbox": "mailto:john.doe@example.com"
+	},
+	"verb": {
+	  "id": "http://example.com/verbs/completed",
+	  "display": { "en-US": "completed" }
+	},
+	"object": {
+	  "id": "http://example.com/activities/example-activity",
+	  "definition": {
+		"name": { "en-US": "Example Activity" }
+	  }
+	}
 };
 
 // Utiliza la función post de Axios para enviar una solicitud HTTP POST a la URL especificada. 
