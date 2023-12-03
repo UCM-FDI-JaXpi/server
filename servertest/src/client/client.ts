@@ -9,18 +9,31 @@ const url = 'http://localhost:3000/traza-jaxpi';
 // Traza de ejemplo a enviar
 const trazajaxpi = {
 	"actor": {
-	  "name": "John Doe",
-	  "mbox": "mailto:john.doe@example.com"
+		"id": "4567",
+		"name": "Player",
+		"mbox": "mailto:player@example.com",
+		"objectType": "Agent"
 	},
+
 	"verb": {
-	  "id": "http://example.com/verbs/completed",
-	  "display": { "en-US": "completed" }
+		"id": "https://github.com/UCM-FDI-JaXpi/lib/accepted",
+		"display": {
+			"en-US": "accepted"
+		}
 	},
+
 	"object": {
-	  "id": "http://example.com/activities/example-activity",
-	  "definition": {
-		"name": { "en-US": "Example Activity" }
-	  }
+		"id": "http://example.com/activity",
+		"definition": {
+			"name": {
+				"en-US": "Object"
+			},
+			"description": {
+				"en-US": "Indicates that the actor has accepted the object. For example, a person accepting an award, or a mission.",
+				"es": "Indica que el actor ha aceptado el objeto. Por ejemplo, una persona aceptando un premio, o una misión."
+			}
+		},
+		"objectType": "Activity"
 	}
 };
 
@@ -29,15 +42,15 @@ const trazajaxpi = {
 // Además, se especifica el encabezado Content-Type como application/json para indicar 
 // que se está enviando un cuerpo en formato JSON.
 axios.post(url, trazajaxpi, {
-  headers: {
-    'Content-Type': 'application/json'
-  }
+	headers: {
+		'Content-Type': 'application/json'
+	}
 })
-// En caso de éxito, imprime la respuesta del servidor
-  .then(response => {
-    console.log('Respuesta:', response.data);
-  })
-// En caso de error, lo imprime
-  .catch(error => {
-    console.error('Error al enviar la traza JaXpi:', error.message);
-  });
+	// En caso de éxito, imprime la respuesta del servidor
+	.then(response => {
+		console.log('Respuesta:', response.data);
+	})
+	// En caso de error, lo imprime
+	.catch(error => {
+		console.error('Error al enviar la traza JaXpi:', error.message);
+	});
