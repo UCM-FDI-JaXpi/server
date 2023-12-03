@@ -22,6 +22,7 @@ app.post('/traza-jaxpi', (req: Request, res: Response) => {
 		return;
 	}
 
+	// Crea el nombre del directorio con el formato fs/user_id/
 	dir = "fs/" + user_id.replace(/["']/g, '');
 
 	// Verifica si existe el directorio, y si no lo crea
@@ -32,10 +33,10 @@ app.post('/traza-jaxpi', (req: Request, res: Response) => {
 	// Determina el próximo número de traza
 	let nextFileNumber: number = fs.readdirSync(dir).length++;
 
-	// Crear el nombre del archivo con el formato "trazaN.json"
+	// Crea el nombre del archivo con el formato "trazaN.json"
 	filepath = dir + "/traza" + nextFileNumber.toString() + ".json";
 
-	// Escribir la traza en el archivo
+	// Escribe la traza en el archivo
 	fs.writeFile(filepath, JSON.stringify(traza, null, 2), (err) => {
 		if (err) {
 			console.error('Error al escribir la traza en el archivo: ', err);
