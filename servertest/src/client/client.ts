@@ -2,6 +2,7 @@
 
 // Importamos la biblioteca axios para realizar peticiones http
 import axios from 'axios';
+import { send } from 'process';
 
 // Especificamos la URL a la que enviaremos la peticion
 const url = 'http://localhost:3000/traza-jaxpi';
@@ -9,7 +10,6 @@ const url = 'http://localhost:3000/traza-jaxpi';
 // Traza de ejemplo a enviar
 const trazajaxpi = {
 	"actor": {
-		"id": "4567",
 		"name": "Player",
 		"mbox": "mailto:player@example.com",
 		"objectType": "Agent"
@@ -37,20 +37,32 @@ const trazajaxpi = {
 	}
 };
 
-// Utiliza la función post de Axios para enviar una solicitud HTTP POST a la URL especificada. 
-// Se pasa el objeto trazaJaXpi como el cuerpo de la solicitud. 
-// Además, se especifica el encabezado Content-Type como application/json para indicar 
-// que se está enviando un cuerpo en formato JSON.
-axios.post(url, trazajaxpi, {
-	headers: {
-		'Content-Type': 'application/json'
+// Lista de trazas para testear funcionamiento de sistema de ficherosS
+const trazaList = [
+	{ user_id: '123', session_id: 'session1', traza: trazajaxpi },
+	{ user_id: '123', session_id: 'session2', traza: trazajaxpi },
+	{ user_id: '123', session_id: 'session1', traza: trazajaxpi },
+	{ user_id: '123', session_id: 'session1', traza: trazajaxpi },
+	{ user_id: '123', session_id: 'session2', traza: trazajaxpi },
+	{ user_id: '456', session_id: 'session1', traza: trazajaxpi },
+	{ user_id: '456', session_id: 'session1', traza: trazajaxpi },
+	{ user_id: '456', session_id: 'session2', traza: trazajaxpi },
+	{ user_id: '789', session_id: 'session1', traza: trazajaxpi },
+];
+
+const sendTraza = async (traza: any) => {
+	try {
+	  const response = await axios.post(url, traza, {
+		headers: {
+		  'Content-Type': 'application/json',
+		},
+	  });
+	  console.log('Respuesta:', response.data);
+	} catch (error) {
+	  console.error('Error al enviar la traza JaXpi:', (error as Error).message);
 	}
-})
-	// En caso de éxito, imprime la respuesta del servidor
-	.then(response => {
-		console.log('Respuesta:', response.data);
-	})
-	// En caso de error, lo imprime
-	.catch(error => {
-		console.error('Error al enviar la traza JaXpi:', error.message);
-	});
+  };
+
+for (const traza of trazaList) {
+	sendTraza(traza);
+}

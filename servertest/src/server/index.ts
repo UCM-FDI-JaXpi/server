@@ -10,20 +10,26 @@ app.use(express.json()); // Permite reconocer solicitudes http como JSON
 // Define una ruta para manejar las solicitudes POST.
 // Tiene dos argumentos, req, de tipo Request, y res, de tipo Response
 app.post('/traza-jaxpi', (req: Request, res: Response) => {
-	const traza = req.body; // Almacena la traza dada por el cliente en el Request 
-	// Restrictivo???
-	let user_id: string = JSON.stringify(traza.actor.id);
+	const { user_id, session_id, traza} = req.body;
 	let dir: string;
 	let filepath: string;
 
-	// Si no está el user_id
-	if (user_id == undefined) {
+	if (!user_id) {
 		res.status(400).send('No se encontró user_id');
+		return;
+	}
+	if (!session_id) {
+		res.status(400).send('No se encontró session_id');
+		return;
+	}
+	if (!traza) {
+		res.status(400).send('No se encontró traza');
 		return;
 	}
 
 	// Crea el nombre del directorio con el formato fs/user_id/
-	dir = "fs/" + user_id.replace(/["']/g, '');
+	// dir = "fs/" + user_id.replace(/["']/g, '');
+	dir = "fs/" + user_id + "/" + session_id;
 
 	// Verifica si existe el directorio, y si no lo crea
 	if (!fs.existsSync(dir)) {
