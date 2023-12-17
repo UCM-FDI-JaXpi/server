@@ -2,7 +2,6 @@
 
 // Importamos la biblioteca axios para realizar peticiones http
 import axios from 'axios';
-import { send } from 'process';
 
 // Especificamos la URL a la que enviaremos la peticion
 const url = 'http://localhost:3000/traza-jaxpi';

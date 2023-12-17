@@ -56,6 +56,24 @@ app.post('/traza-jaxpi', (req: Request, res: Response) => {
 	});
 });
 
+// Define una ruta GET para obtener la lista de IDs de usuario
+app.get('/traza-jaxpi', (req: Request, res: Response) => {
+	let dir: string = "fs/";
+	// Lee los directorios dentro de la carpeta base (fs/)
+	fs.readdir(dir, (err, users) => {
+	  if (err) {
+		console.error('Error al leer los directorios: ', err);
+		res.status(500).send('Error interno del servidor al obtener la lista de IDs de usuario.');
+		return;
+	  }
+  
+	// Filtra solo los directorios
+	const user_dir = users.filter(user => fs.statSync(dir + user).isDirectory());
+  
+	res.json({ user_ids: user_dir });
+	});
+  });
+
 // Inicia el servidor express para escuchar en el puerto especificado. 
 // Cuando el servidor está listo, se imprime un mensaje en la consola indicando la dirección  
 // y el puerto en los que la aplicación está escuchando.
