@@ -10,7 +10,7 @@ app.use(express.json()); // Permite reconocer solicitudes http como JSON
 // Define una ruta para manejar las solicitudes POST.
 // Tiene dos argumentos, req, de tipo Request, y res, de tipo Response
 app.post('/traza-jaxpi', (req: Request, res: Response) => {
-	const { user_id, session_id, traza} = req.body;
+	const { user_id, session_id, traza } = req.body;
 	let dir: string;
 	let filepath: string;
 
@@ -61,18 +61,60 @@ app.get('/traza-jaxpi', (req: Request, res: Response) => {
 	let dir: string = "fs/";
 	// Lee los directorios dentro de la carpeta base (fs/)
 	fs.readdir(dir, (err, users) => {
-	  if (err) {
-		console.error('Error al leer los directorios: ', err);
-		res.status(500).send('Error interno del servidor al obtener la lista de IDs de usuario.');
-		return;
-	  }
-  
-	// Filtra solo los directorios
-	const user_dir = users.filter(user => fs.statSync(dir + user).isDirectory());
-  
-	res.json({ user_ids: user_dir });
+		if (err) {
+			console.error('Error al leer los directorios: ', err);
+			res.status(500).send('Error interno del servidor al obtener la lista de IDs de usuario.');
+			return;
+		}
+
+		// Filtra solo los directorios
+		const user_dir = users.filter(user => fs.statSync(dir + user).isDirectory());
+
+		res.json({ user_ids: user_dir });
 	});
-  });
+});
+
+// Define una ruta GET para obtener todas las trazas asociadas a un usuario
+app.get('/traza-jaxpi/:user_id', (req: Request, res: Response) => {
+	const user_id: string = req.params.user_id;
+	const user_dir: string = "fs/" + user_id + "/";
+	let session_dir: string;
+	let traza_path: string;
+	let traza_data: string;
+	let trazas: JSON[] = [];
+
+	// Lee los contenidos del directorio del usuario
+	fs.readdir(user_dir, (err, sessions) => {
+		if (err) {
+			console.error('Error al leer los directorios: ', err);
+			res.status(500).send("Error interno del servidor al obtener las trazas del usuario " + user_id);
+			return;
+		}
+
+		// Iterar sobre todas las sesiones
+		for (const session of sessions) {
+			session_dir = user_dir + session;
+
+			// Filtrar solo los archivos que comienzan con 'traza' y terminan con '.json'
+			const trazas_filtradas = fs.readdirSync(session_dir).filter(traza => traza.startsWith('traza') && traza.endsWith('.json'));
+
+			// Iterar sobre las trazas filtradas y leer su contenido
+			for (const traza of trazas_filtradas) {
+				traza_path = session_dir + "/" + traza;
+				try {
+					// Leer el contenido de la traza y agregarlo al array
+					traza_data = fs.readFileSync(traza_path, 'utf-8');
+					trazas.push(JSON.parse(traza_data));
+				} catch (error) {
+					console.error("Error al leer en " + traza_path + ": " + (error as Error).message);
+				}
+			}
+		}
+
+		// Enviar todas las trazas en formato JSON como respuesta
+		res.json({ trazas: trazas });
+	});
+});
 
 // Inicia el servidor express para escuchar en el puerto especificado. 
 // Cuando el servidor está listo, se imprime un mensaje en la consola indicando la dirección  
