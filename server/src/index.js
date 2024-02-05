@@ -2,140 +2,162 @@
 const express = require('express');
 const fs = require('fs');
 const session = require('express-session');
+const { MongoClient } = require('mongodb');
 const { authenticateUser } = require('./auth');
 
 const app = express();
 const port = 3000;
 
+// Express sessions config
 app.use(express.json());
 app.use(session({
-    secret: 'your_secret', // Change this to a more secure secret string
-    resave: false,
-    saveUninitialized: true,
+	secret: 'yc8v94jdij!1blfyt=v=)@70z7r1#gsu@nf5*)c_06ddy=+$9',
+	resave: false,
+	saveUninitialized: true,
 }));
 
-// Route for login
-app.post('/login', (req, res) => {
-    const { username, password } = req.body;
+// Mongo config
+const url = 'mongodb://127.0.0.1:27017';
+const dbName = 'jaxpi_db';
 
-    // Verify the username and password (you should store this information securely, such as in a database)
-    if (username === 'user' && password === 'password') {
-        // Successful authentication, set the session
-        req.session.user_id = username;
-        req.session.session_id = 'session123'; // You can generate a unique session ID here
+MongoClient.connect(url, { useNewUrlParser: true, useUnifiedTopology: true }, (err, client) => {
+	if (err) {
+		console.error('Error connecting to MongoDB:', err);
+		return;
+	} else {
+		const db = client.db(dbName);
+		console.log('Connected to MongoDB');
+	}
 
-        res.status(200).send('Login successful.');
-    } else {
-        res.status(401).send('Login failed. Incorrect username or password.');
-    }
-});
+	// Route for login
+	app.post('/login', (req, res) => {
+		const { username, password } = req.body;
 
-// Route for registration
-app.post('/register', (req, res) => {
-    const { username, password, repeat_password } = req.body;
+		// Verify the username and password (you should store this information securely, such as in a database)
+		if (username === 'user' && password === 'password') {
+			// Successful authentication, set the session
+			req.session.user_id = username;
+			req.session.session_id = 'session123'; // You can generate a unique session ID here
 
-    // Implement registration logic here (e.g., validate email address, etc.)
+			res.status(200).send('Login successful.');
+		} else {
+			res.status(401).send('Login failed. Incorrect username or password.');
+		}
+	});
 
-    // For example purposes only, check if passwords match
-    if (password !== repeat_password) {
-        res.status(400).send('Passwords do not match.');
-    } else {
-        // Register the user (you should store this information securely, such as in a database)
-        res.status(200).send('Registration successful.');
-    }
-});
+	// Route for registration
+	app.post('/register', (req, res) => {
+		const { username, password, repeat_password } = req.body;
 
-app.post('/record-jaxpi', (req, res) => {
-    const { user_id, session_id, record } = req.body;
-    let dir;
-    let filepath;
+		// Implement registration logic here (e.g., validate email address, etc.)
 
-    if (!user_id) {
-        res.status(400).send('User_id not found');
-        return;
-    }
-    if (!session_id) {
-        res.status(400).send('Session_id not found');
-        return;
-    }
-    if (!record) {
-        res.status(400).send('Record not found');
-        return;
-    }
+		// For example purposes only, check if passwords match
+		if (password !== repeat_password) {
+			res.status(400).send('Passwords do not match.');
+		} else {
+			// Register the user (you should store this information securely, such as in a database)
+			res.status(200).send('Registration successful.');
+		}
+	});
 
-    dir = `fs/${user_id}/${session_id}`;
+	app.post('/record-jaxpi', (req, res) => {
+		const { user_id, session_id, record } = req.body;
+		let dir;
+		let filepath;
 
-    if (!fs.existsSync(dir)) {
-        fs.mkdirSync(dir, { recursive: true });
-    }
+		if (!user_id) {
+			res.status(400).send('User_id not found');
+			return;
+		}
+		if (!session_id) {
+			res.status(400).send('Session_id not found');
+			return;
+		}
+		if (!record) {
+			res.status(400).send('Record not found');
+			return;
+		}
 
-    let nextFileNumber = fs.readdirSync(dir).length;
+		dir = `fs/${user_id}/${session_id}`;
 
-    filepath = `${dir}/record${nextFileNumber}.json`;
+		if (!fs.existsSync(dir)) {
+			fs.mkdirSync(dir, { recursive: true });
+		}
 
-    fs.writeFile(filepath, JSON.stringify(record, null, 2), (err) => {
-        if (err) {
-            console.error('Error writing record to file: ', err);
-            res.status(500).send('Internal server error while saving the record.');
-        } else {
-            console.log('JaXpi record received and stored at:', filepath);
-            res.status(200).send('JaXpi record received and stored successfully.');
-        }
-    });
-});
+		let nextFileNumber = fs.readdirSync(dir).length;
 
-app.get('/record-jaxpi', (req, res) => {
-    let dir = 'fs/';
+		filepath = `${dir}/record${nextFileNumber}.json`;
 
-    fs.readdir(dir, (err, users) => {
-        if (err) {
-            console.error('Error reading directories: ', err);
-            res.status(500).send('Internal server error while getting the list of user IDs.');
-            return;
-        }
+		fs.writeFile(filepath, JSON.stringify(record, null, 2), (err) => {
+			if (err) {
+				console.error('Error writing record to file: ', err);
+				res.status(500).send('Internal server error while saving the record.');
+			} else {
+				console.log('JaXpi record received and stored at:', filepath);
+				res.status(200).send('JaXpi record received and stored successfully.');
+			}
+		});
+	});
 
-        const user_dir = users.filter(user => fs.statSync(`${dir}${user}`).isDirectory());
+	app.get('/record-jaxpi', (req, res) => {
+		let dir = 'fs/';
 
-        res.json({ user_ids: user_dir });
-    });
-});
+		fs.readdir(dir, (err, users) => {
+			if (err) {
+				console.error('Error reading directories: ', err);
+				res.status(500).send('Internal server error while getting the list of user IDs.');
+				return;
+			}
 
-app.get('/record-jaxpi/:user_id', (req, res) => {
-    let session_dir;
-    let record_path;
-    let record_data;
-    let records = [];
+			const user_dir = users.filter(user => fs.statSync(`${dir}${user}`).isDirectory());
 
-    const user_id = req.params.user_id;
-    const user_dir = `fs/${user_id}/`;
+			res.json({ user_ids: user_dir });
+		});
+	});
 
-    fs.readdir(user_dir, (err, sessions) => {
-        if (err) {
-            console.error('Error reading directories: ', err);
-            res.status(500).send(`Internal server error while getting records for user ${user_id}`);
-            return;
-        }
+	app.get('/record-jaxpi/:user_id', (req, res) => {
+		let session_dir;
+		let record_path;
+		let record_data;
+		let records = [];
 
-        for (const session of sessions) {
-            session_dir = `${user_dir}${session}`;
-            const filtered_records = fs.readdirSync(session_dir).filter(record => record.startsWith('record') && record.endsWith('.json'));
+		const user_id = req.params.user_id;
+		const user_dir = `fs/${user_id}/`;
 
-            for (const record of filtered_records) {
-                record_path = `${session_dir}/${record}`;
-                try {
-                    record_data = fs.readFileSync(record_path, 'utf-8');
-                    const record_parsed = JSON.parse(record_data);
-                    records.push(record_parsed);
-                } catch (error) {
-                    console.error(`Error reading from ${record_path}: ${(error instanceof Error) ? error.message : error}`);
-                }
-            }
-        }
+		fs.readdir(user_dir, (err, sessions) => {
+			if (err) {
+				console.error('Error reading directories: ', err);
+				res.status(500).send(`Internal server error while getting records for user ${user_id}`);
+				return;
+			}
 
-        res.json(JSON.stringify({ records: records }, null, 2));
-    });
-});
+			for (const session of sessions) {
+				session_dir = `${user_dir}${session}`;
+				const filtered_records = fs.readdirSync(session_dir).filter(record => record.startsWith('record') && record.endsWith('.json'));
 
-app.listen(port, () => {
-    console.log(`The application is listening at http://localhost:${port}`);
-});
+				for (const record of filtered_records) {
+					record_path = `${session_dir}/${record}`;
+					try {
+						record_data = fs.readFileSync(record_path, 'utf-8');
+						const record_parsed = JSON.parse(record_data);
+						records.push(record_parsed);
+					} catch (error) {
+						console.error(`Error reading from ${record_path}: ${(error instanceof Error) ? error.message : error}`);
+					}
+				}
+			}
+
+			res.json(JSON.stringify({ records: records }, null, 2));
+		});
+	});
+
+	app.listen(port, () => {
+		console.log(`The application is listening at http://localhost:${port}`);
+	});
+
+	// Not-handled errors controller
+	app.use((err, req, res, next) => {
+		console.error(err.stack);
+		res.status(500).send('Something went wrong!');
+	});
+}); 
