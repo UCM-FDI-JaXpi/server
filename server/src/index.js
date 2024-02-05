@@ -2,33 +2,64 @@
 const express = require('express');
 const fs = require('fs');
 const session = require('express-session');
-const { authenticateUser } = require('./auth'); // Ajusta la ruta según tu estructura de archivos
+const { authenticateUser } = require('./auth');
 
 const app = express();
-const puerto = 3000;
+const port = 3000;
 
 app.use(express.json());
 app.use(session({
-    secret: 'tu_secreto', // Cambia esto a una cadena secreta más segura
+    secret: 'your_secret', // Change this to a more secure secret string
     resave: false,
     saveUninitialized: true,
 }));
 
-app.post('/traza-jaxpi', (req, res) => {
-    const { user_id, session_id, traza } = req.body;
+// Route for login
+app.post('/login', (req, res) => {
+    const { username, password } = req.body;
+
+    // Verify the username and password (you should store this information securely, such as in a database)
+    if (username === 'user' && password === 'password') {
+        // Successful authentication, set the session
+        req.session.user_id = username;
+        req.session.session_id = 'session123'; // You can generate a unique session ID here
+
+        res.status(200).send('Login successful.');
+    } else {
+        res.status(401).send('Login failed. Incorrect username or password.');
+    }
+});
+
+// Route for registration
+app.post('/register', (req, res) => {
+    const { username, password, repeat_password } = req.body;
+
+    // Implement registration logic here (e.g., validate email address, etc.)
+
+    // For example purposes only, check if passwords match
+    if (password !== repeat_password) {
+        res.status(400).send('Passwords do not match.');
+    } else {
+        // Register the user (you should store this information securely, such as in a database)
+        res.status(200).send('Registration successful.');
+    }
+});
+
+app.post('/record-jaxpi', (req, res) => {
+    const { user_id, session_id, record } = req.body;
     let dir;
     let filepath;
 
     if (!user_id) {
-        res.status(400).send('No se encontró user_id');
+        res.status(400).send('User_id not found');
         return;
     }
     if (!session_id) {
-        res.status(400).send('No se encontró session_id');
+        res.status(400).send('Session_id not found');
         return;
     }
-    if (!traza) {
-        res.status(400).send('No se encontró traza');
+    if (!record) {
+        res.status(400).send('Record not found');
         return;
     }
 
@@ -40,26 +71,26 @@ app.post('/traza-jaxpi', (req, res) => {
 
     let nextFileNumber = fs.readdirSync(dir).length;
 
-    filepath = `${dir}/traza${nextFileNumber}.json`;
+    filepath = `${dir}/record${nextFileNumber}.json`;
 
-    fs.writeFile(filepath, JSON.stringify(traza, null, 2), (err) => {
+    fs.writeFile(filepath, JSON.stringify(record, null, 2), (err) => {
         if (err) {
-            console.error('Error al escribir la traza en el archivo: ', err);
-            res.status(500).send('Error interno del servidor al guardar la traza.');
+            console.error('Error writing record to file: ', err);
+            res.status(500).send('Internal server error while saving the record.');
         } else {
-            console.log('Traza JaXpi recibida y almacenada en:', filepath);
-            res.status(200).send('Traza JaXpi recibida y almacenada correctamente.');
+            console.log('JaXpi record received and stored at:', filepath);
+            res.status(200).send('JaXpi record received and stored successfully.');
         }
     });
 });
 
-app.get('/traza-jaxpi', (req, res) => {
+app.get('/record-jaxpi', (req, res) => {
     let dir = 'fs/';
 
     fs.readdir(dir, (err, users) => {
         if (err) {
-            console.error('Error al leer los directorios: ', err);
-            res.status(500).send('Error interno del servidor al obtener la lista de IDs de usuario.');
+            console.error('Error reading directories: ', err);
+            res.status(500).send('Internal server error while getting the list of user IDs.');
             return;
         }
 
@@ -69,42 +100,42 @@ app.get('/traza-jaxpi', (req, res) => {
     });
 });
 
-app.get('/traza-jaxpi/:user_id', (req, res) => {
+app.get('/record-jaxpi/:user_id', (req, res) => {
     let session_dir;
-    let traza_path;
-    let traza_data;
-    let trazas = [];
+    let record_path;
+    let record_data;
+    let records = [];
 
     const user_id = req.params.user_id;
     const user_dir = `fs/${user_id}/`;
 
     fs.readdir(user_dir, (err, sessions) => {
         if (err) {
-            console.error('Error al leer los directorios: ', err);
-            res.status(500).send(`Error interno del servidor al obtener las trazas del usuario ${user_id}`);
+            console.error('Error reading directories: ', err);
+            res.status(500).send(`Internal server error while getting records for user ${user_id}`);
             return;
         }
 
         for (const session of sessions) {
             session_dir = `${user_dir}${session}`;
-            const trazas_filtradas = fs.readdirSync(session_dir).filter(traza => traza.startsWith('traza') && traza.endsWith('.json'));
+            const filtered_records = fs.readdirSync(session_dir).filter(record => record.startsWith('record') && record.endsWith('.json'));
 
-            for (const traza of trazas_filtradas) {
-                traza_path = `${session_dir}/${traza}`;
+            for (const record of filtered_records) {
+                record_path = `${session_dir}/${record}`;
                 try {
-                    traza_data = fs.readFileSync(traza_path, 'utf-8');
-                    const traza_parsed = JSON.parse(traza_data);
-                    trazas.push(traza_parsed);
+                    record_data = fs.readFileSync(record_path, 'utf-8');
+                    const record_parsed = JSON.parse(record_data);
+                    records.push(record_parsed);
                 } catch (error) {
-                    console.error(`Error al leer en ${traza_path}: ${(error instanceof Error) ? error.message : error}`);
+                    console.error(`Error reading from ${record_path}: ${(error instanceof Error) ? error.message : error}`);
                 }
             }
         }
 
-        res.json(JSON.stringify({ trazas: trazas }, null, 2));
+        res.json(JSON.stringify({ records: records }, null, 2));
     });
 });
 
-app.listen(puerto, () => {
-    console.log(`La aplicación está escuchando en http://localhost:${puerto}`);
+app.listen(port, () => {
+    console.log(`The application is listening at http://localhost:${port}`);
 });
