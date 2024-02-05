@@ -1,10 +1,10 @@
 // auth.js
 const authenticateUser = (req, res, next) => {
     if (req.session && req.session.user_id && req.session.session_id) {
-        // El usuario está autenticado correctamente
+        // The user is authenticated successfully
         next();
     } else {
-        res.status(401).send('Autenticación fallida. Usuario no autenticado.');
+        res.status(401).send('Authentication failed. User not authenticated.');
     }
 };
 
