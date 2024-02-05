@@ -1,9 +1,9 @@
 // post_test.js
 const axios = require('axios');
 
-const url = 'http://localhost:3000/traza-jaxpi';
+const url = 'http://localhost:3000/record-jaxpi';
 
-const trazajaxpi = {
+const recordJaXpi = {
     "actor": {
         "name": "Player",
         "mbox": "mailto:player@example.com",
@@ -30,31 +30,31 @@ const trazajaxpi = {
     }
 };
 
-const trazaList = [
-    { user_id: '123', session_id: 'session1', traza: trazajaxpi },
-    { user_id: '123', session_id: 'session2', traza: trazajaxpi },
-    { user_id: '123', session_id: 'session1', traza: trazajaxpi },
-    { user_id: '123', session_id: 'session1', traza: trazajaxpi },
-    { user_id: '123', session_id: 'session2', traza: trazajaxpi },
-    { user_id: '456', session_id: 'session1', traza: trazajaxpi },
-    { user_id: '456', session_id: 'session1', traza: trazajaxpi },
-    { user_id: '456', session_id: 'session2', traza: trazajaxpi },
-    { user_id: '789', session_id: 'session1', traza: trazajaxpi },
+const recordList = [
+    { user_id: '123', session_id: 'session1', record: recordJaXpi },
+    { user_id: '123', session_id: 'session2', record: recordJaXpi },
+    { user_id: '123', session_id: 'session1', record: recordJaXpi },
+    { user_id: '123', session_id: 'session1', record: recordJaXpi },
+    { user_id: '123', session_id: 'session2', record: recordJaXpi },
+    { user_id: '456', session_id: 'session1', record: recordJaXpi },
+    { user_id: '456', session_id: 'session1', record: recordJaXpi },
+    { user_id: '456', session_id: 'session2', record: recordJaXpi },
+    { user_id: '789', session_id: 'session1', record: recordJaXpi },
 ];
 
-const sendTraza = async (traza) => {
+const sendRecord = async (record) => {
     try {
-        const response = await axios.post(url, traza, {
+        const response = await axios.post(url, record, {
             headers: {
                 'Content-Type': 'application/json',
             },
         });
-        console.log('Respuesta:', response.data);
+        console.log('Response:', response.data);
     } catch (error) {
-        console.error('Error al enviar la traza JaXpi:', error.message);
+        console.error('Error sending JaXpi record:', error.message);
     }
 };
 
-for (const traza of trazaList) {
-    sendTraza(traza);
+for (const record of recordList) {
+    sendRecord(record);
 }

@@ -1,17 +1,17 @@
-// client.js
+// get_records_test.js
 const axios = require('axios');
 
-const url = 'http://localhost:3000/traza-jaxpi/';
+const url = 'http://localhost:3000/record-jaxpi/';
 
-const getTrazas = async (user_id) => {
+const getRecords = async (user_id) => {
     try {
         const response = await axios.get(url + user_id);
-        console.log('Respuesta:', response.data);
+        console.log('Response:', response.data);
     } catch (error) {
-        console.error('Error al realizar la petición GET:', error.message);
+        console.error('Error making GET request:', error.message);
     }
 };
 
-getTrazas("123");
-getTrazas("456");
-getTrazas("456");
+getRecords("123");
+getRecords("456");
+getRecords("456");
