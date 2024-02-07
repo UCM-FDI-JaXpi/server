@@ -19,8 +19,8 @@ router.get('/:uid', getUser, (req, res) => {
 
 // Creating one user
 router.post('/', async (req, res) => {
-	const record = new Record({
-		user_id: req.body.user_id
+	const user = new User({
+		name: req.body.name
 	});
 	try {
 		const newUser = await user.save();
@@ -36,7 +36,7 @@ router.patch('/:uid', getUser, async (req, res) => {
 		res.user.name = req.body.name;
 	}
 	try {
-		const updatedUser = await res.user.save();
+		const updatedUser = await res.subscriber.save();
 		res.json(updatedUser);
 	} catch(err) {
 		res.status(400).json({ message: err.message });

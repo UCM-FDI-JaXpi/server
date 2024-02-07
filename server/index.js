@@ -5,10 +5,12 @@ const express = require('express');
 const session = require('express-session');
 const mongoose = require('mongoose');
 
-const fs = require('fs');
+// JUST FOR LEARNING PURPOSES, to be deleted
+// const users[];
 
 const app = express();
 const port = 3000;
+app.set('view engine', 'ejs');
 
 // Express sessions config
 app.use(session({
@@ -39,6 +41,19 @@ app.use('/users', recordsRouter);
 // Router for statement petitions
 const statementsRouter = require('./routes/statements');
 app.use('/statements', statementsRouter);
+
+// Router for login
+const loginRouter = require('./routes/login');
+app.use('/login', loginRouter);
+
+// Router for register
+const registerRouter = require('./routes/register');
+app.use('/register', registerRouter);
+
+// ejs
+app.get('/', (req, res) => {
+	res.render('index.ejs', { name: 'Kyle'});
+});
 
 app.listen(port, () => {
 	console.log(`The application is listening at http://localhost:${port}`);
