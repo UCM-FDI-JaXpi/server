@@ -3,8 +3,8 @@ require('dotenv').config()
 
 const express = require('express');
 const session = require('express-session');
-const bcrypt = require('bcrypt');
 const mongoose = require('mongoose');
+const passport = require('passport');
 
 // JUST FOR LEARNING PURPOSES, to be deleted
 // const users[];
@@ -14,6 +14,10 @@ const app = express();
 const port = 3000;
 app.use(express.urlencoded({ extended: false }));
 app.set('view engine', 'ejs');
+
+// Passport config
+const initializePassport = require('./passport-config');
+initializePassport(passport);
 
 // Express sessions config
 app.use(session({
