@@ -5,4 +5,8 @@ router.get('/', (req, res) => {
 	res.render('login');
 });
 
+router.post('/', (req, res) => {
+	req.body.name
+});
+
 module.exports = router;

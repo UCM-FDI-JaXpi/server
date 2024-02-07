@@ -17,18 +17,7 @@ router.get('/:uid', getUser, (req, res) => {
 	res.send(res.user);
 });
 
-// Creating one user
-router.post('/', async (req, res) => {
-	const user = new User({
-		name: req.body.name
-	});
-	try {
-		const newUser = await user.save();
-		res.status(201).json(newUser); // 201 means succesfully created an object
-	} catch(err) {
-		res.status(400).json({ message: err.message }); 
-	}
-});
+// Even if this is a REST API, the user creation is made in register
 
 // Updating one user
 router.patch('/:uid', getUser, async (req, res) => {
