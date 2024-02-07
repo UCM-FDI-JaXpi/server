@@ -2,6 +2,11 @@ GET http://localhost:3000/users
 
 ###
 
+GET http://localhost:3000/statements
+
+###
+
+
 GET http://localhost:3000/users/65c3593e0460a88d29e63e01
 
 ###
@@ -19,9 +24,21 @@ DELETE http://localhost:3000/users/65c3593e0460a88d29e63e01
 
 ###
 
-PATCH http://localhost:3000/users/65c3593e0460a88d29e63e01
+PATCH http://localhost:3000/users/65c35f635062c7324c2f0162
 Content-Type: application/json
 
 {
 	"name": "pepa"
+}
+
+###
+
+POST http://localhost:3000/register
+Content-Type: application/json
+
+{
+    "name": "Oriana",
+    "email": "oriana@gmail.com",
+    "pwd": "Pp123456",
+    "rep_pwd": "Pp123456"
 }

@@ -1,36 +1,63 @@
 const express = require('express');
+const bcrypt = require('bcrypt');
 const router = express.Router();
+const User = require('../models/user');
 
-router.use(express.urlencoded({ extended: false })); 
+// Password validation function
+function validatePassword(password) {
+    // Verify its length >= 8
+    if (password.length < 8)
+        return false;
+
+	// Verify it contains at least one lowercase letter
+    if (!/[a-z]/.test(password))
+        return false;
+
+    // Verify it contains at least one capital letter
+    if (!/[A-Z]/.test(password))
+        return false;
+
+    // Verify it contains at least one number
+    if (!/\d/.test(password))
+        return false;
+
+    return true;
+}
 
 router.get('/', (req, res) => {
 	res.render('register');
 });
 
 // Creating one user
-router.post('/register', async (req, res) => {
-    const { username, email, password, rep_password } = req.body;
+router.post('/', async (req, res) => {
+    const { name, email, pwd, rep_pwd } = req.body;
 
     // Verify passwords match
-    if (password !== rep_password) {
+    if (pwd !== rep_pwd) {
         return res.status(400).json({ message: 'Passwords do not match' });
     }
 
     try {
         // Verify if the user name already exists
-        const existingUser = await User.findOne({ username });
+        const existingUser = await User.findOne({ name });
         if (existingUser)
-            return res.status(400).json({ message: 'Username already exists' });
+            return res.status(400).json({ message: 'User name already exists' });
 
         // Verify if email is already in use
         const existingEmail = await User.findOne({ email });
         if (existingEmail)
             return res.status(400).json({ message: 'Email already in use' });
 
+		if (!validatePassword(pwd))
+			return res.status(400).json({ message: 'Password must contain at least 8 characters, including at least one uppercase letter, one lowercase letter, and one number' })
+
+
         // Create user
-        const newUser = new User({ username, email, password });
+		const password = await bcrypt.hash(pwd, 10);
+        const newUser = new User({ name, email, password });
         await newUser.save();
-        res.status(201).json(newUser);
+
+		res.redirect('/login');
 
     } catch (error) {
         res.status(400).json({ message: error.message });

@@ -34,8 +34,8 @@ router.post('/', async (req, res) => {
 });
 
 // Updating one statement
-router.patch('/:uid', getStatementByID, async (req, res) => {
-	if(req.body.name != null) {
+router.patch('/:id', getStatementByID, async (req, res) => {
+	if(req.body.name != stll) {
 		res.user.name = req.body.name;
 	}
 	try {

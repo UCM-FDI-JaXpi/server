@@ -9,8 +9,10 @@ const mongoose = require('mongoose');
 // JUST FOR LEARNING PURPOSES, to be deleted
 // const users[];
 
+// Server config
 const app = express();
 const port = 3000;
+app.use(express.urlencoded({ extended: false }));
 app.set('view engine', 'ejs');
 
 // Express sessions config
