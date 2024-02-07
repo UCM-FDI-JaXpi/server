@@ -1,60 +1,61 @@
-// post_test.js
 const axios = require('axios');
 
-const url = 'http://localhost:3000/record-jaxpi';
-
-const recordJaXpi = {
-    "actor": {
-        "name": "Player",
-        "mbox": "mailto:player@example.com",
-        "objectType": "Agent"
-    },
-    "verb": {
-        "id": "https://github.com/UCM-FDI-JaXpi/lib/accepted",
-        "display": {
-            "en-US": "accepted"
-        }
-    },
-    "object": {
-        "id": "http://example.com/activity",
-        "definition": {
-            "name": {
-                "en-US": "Object"
-            },
-            "description": {
-                "en-US": "Indicates that the actor has accepted the object. For example, a person accepting an award, or a mission.",
-                "es": "Indica que el actor ha aceptado el objeto. Por ejemplo, una persona aceptando un premio, o una misión."
+// Función para enviar una solicitud POST al servidor para crear una nueva declaración
+async function createStatement() {
+    const user_id = "65c35e20e98bbe1a52518226";
+    const statement = {
+        actor: {
+            name: 'Sally Glider',
+            mbox: 'mailto:sally@example.com'
+        },
+        verb: {
+            id: 'http://adlnet.gov/expapi/verbs/completed',
+            display: { 'en-US': 'completed' }
+        },
+        object: {
+            id: 'http://example.com/activities/hang-gliding-test',
+            definition: {
+                type: 'http://adlnet.gov/expapi/activities/assessment',
+                name: { 'en-US': 'Hang Gliding Test' },
+                description: { 'en-US': 'The Solo Hang Gliding test, consisting of a timed flight from the peak of Mount Magazine' },
+                extensions: { 'http://example.com/gliderClubId': 'test-435' }
             }
         },
-        "objectType": "Activity"
-    }
-};
-
-const recordList = [
-    { user_id: '123', session_id: 'session1', record: recordJaXpi },
-    { user_id: '123', session_id: 'session2', record: recordJaXpi },
-    { user_id: '123', session_id: 'session1', record: recordJaXpi },
-    { user_id: '123', session_id: 'session1', record: recordJaXpi },
-    { user_id: '123', session_id: 'session2', record: recordJaXpi },
-    { user_id: '456', session_id: 'session1', record: recordJaXpi },
-    { user_id: '456', session_id: 'session1', record: recordJaXpi },
-    { user_id: '456', session_id: 'session2', record: recordJaXpi },
-    { user_id: '789', session_id: 'session1', record: recordJaXpi },
-];
-
-const sendRecord = async (record) => {
-    try {
-        const response = await axios.post(url, record, {
-            headers: {
-                'Content-Type': 'application/json',
+        result: {
+            completion: true,
+            success: true,
+            score: { scaled: 0.95 },
+            extensions: { 'http://example.com/flight/averagePitch': 0.05 }
+        },
+        context: {
+            instructor: {
+                name: 'Irene Instructor',
+                mbox: 'mailto:irene@example.com'
             },
-        });
-        console.log('Response:', response.data);
-    } catch (error) {
-        console.error('Error sending JaXpi record:', error.message);
-    }
-};
+            contextActivities: {
+                parent: { id: 'http://example.com/activities/hang-gliding-class-a' },
+                grouping: { id: 'http://example.com/activities/hang-gliding-school' }
+            },
+            extensions: { 'http://example.com/weatherConditions': 'rainy' }
+        },
+        timestamp: '2012-07-05T18:30:32.360Z',
+        stored: '2012-07-05T18:30:33.540Z',
+        authority: {
+            name: 'Irene Instructor',
+            mbox: 'mailto:irene@example.com'
+        }
+    };
 
-for (const record of recordList) {
-    sendRecord(record);
+    try {
+        const response = await axios.post('http://localhost:3000/statements', {
+            user_id: user_id,
+            statement: statement
+        });
+        console.log('Declaración creada:', response.data);
+    } catch (error) {
+        console.error('Error al crear la declaración:', error.response.data.message || error.message);
+    }
 }
+
+// Llamar a la función para crear una nueva declaración
+createStatement();
