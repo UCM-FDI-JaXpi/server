@@ -3,6 +3,7 @@ require('dotenv').config()
 
 const express = require('express');
 const session = require('express-session');
+const bcrypt = require('bcrypt');
 const mongoose = require('mongoose');
 
 // JUST FOR LEARNING PURPOSES, to be deleted
