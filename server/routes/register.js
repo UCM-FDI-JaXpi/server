@@ -7,8 +7,13 @@ router.get('/', (req, res) => {
 	res.render('register');
 });
 
-router.post('/', (req, res) => {
+// Falta validar
+router.post('/', async (req, res) => {
+	try {
+		const hashedPW = await bcrypt.hash(req.body.password, 10);
+	} catch(err) {
 
+	}
 });
 
 module.exports = router;
