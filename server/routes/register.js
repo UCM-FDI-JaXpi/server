@@ -60,7 +60,7 @@ router.post('/', async (req, res) => {
 		res.redirect('/login');
 
     } catch (error) {
-        res.status(400).json({ message: error.message });
+		res.redirect('/register');
     }
 });
 
