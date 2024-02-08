@@ -1,10 +1,14 @@
 // index.js
-require('dotenv').config()
+if (process.env.NODE_ENV !== 'production') {
+	require('dotenv').config();
+}
 
 const express = require('express');
+const flash = require('express-flash');
 const session = require('express-session');
 const mongoose = require('mongoose');
 const passport = require('passport');
+const User = require('./models/user');
 
 // JUST FOR LEARNING PURPOSES, to be deleted
 // const users[];
@@ -13,18 +17,41 @@ const passport = require('passport');
 const app = express();
 const port = 3000;
 app.use(express.urlencoded({ extended: false }));
+app.use(flash());
 app.set('view engine', 'ejs');
-
-// Passport config
-const initializePassport = require('./passport-config');
-initializePassport(passport);
 
 // Express sessions config
 app.use(session({
-	secret: 'yc8v94jdij!1blfyt=v=)@70z7r1#gsu@nf5*)c_06ddy=+$9',
+	secret: process.env.SESSION_SECRET,
 	resave: false,
-	saveUninitialized: true,
+	saveUninitialized: false
 }));
+
+// Passport config
+const initializePassport = require('./passport-config');
+const getUserByEmail = async (email) => {
+    try {
+        const user = await User.findOne({ email: email });
+        return user;
+    } catch (error) {
+        console.error('Error finding user by email:', error);
+        return null;
+    }
+};
+
+const getUserById = async (id) => {
+    try {
+        const user = await User.findById(id);
+        return user;
+    } catch (error) {
+        console.error('Error finding user by ID:', error);
+        return null;
+    }
+};
+
+initializePassport(passport, getUserByEmail, getUserById);
+app.use(passport.initialize());
+app.use(passport.session());
 
 // Mongo config
 mongoose.connect(process.env.DATABASE_URL);

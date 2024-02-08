@@ -1,6 +1,5 @@
 const axios = require('axios');
 
-// Función para enviar una solicitud POST al servidor para crear una nueva declaración
 async function createStatement() {
     const user_id = "65c35e20e98bbe1a52518226";
     const statement = {
@@ -51,11 +50,10 @@ async function createStatement() {
             user_id: user_id,
             statement: statement
         });
-        console.log('Declaración creada:', response.data);
+        console.log('Statement created:', response.data);
     } catch (error) {
-        console.error('Error al crear la declaración:', error.response.data.message || error.message);
+        console.error('Error creating statement:', error.response.data.message || error.message);
     }
 }
 
-// Llamar a la función para crear una nueva declaración
 createStatement();
