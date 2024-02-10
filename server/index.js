@@ -39,6 +39,25 @@ const getUserByEmail = async (email) => {
     }
 };
 
+function checkAuthenticated(req, res, next) {
+	if (req.isAuthenticated()) {
+		return next();
+	}
+
+	res.redirect('login');
+}
+
+function checkNotAuthenticated(req, res, next) {
+	if (req.isAuthenticated()) {
+		res.redirect('/');
+	}
+
+	return next();
+}
+
+module.exports.checkAuthenticated = checkAuthenticated;
+module.exports.checkNotAuthenticated = checkNotAuthenticated;
+
 const getUserById = async (id) => {
     try {
         const user = await User.findById(id);
@@ -85,8 +104,8 @@ const registerRouter = require('./routes/register');
 app.use('/register', registerRouter);
 
 // ejs
-app.get('/', (req, res) => {
-	res.render('index.ejs', { name: 'Kyle'});
+app.get('/', checkAuthenticated, (req, res) => {
+	res.render('index.ejs', { name: req.user.name });
 });
 
 app.listen(port, () => {

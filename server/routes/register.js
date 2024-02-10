@@ -2,6 +2,7 @@ const express = require('express');
 const bcrypt = require('bcrypt');
 const router = express.Router();
 const User = require('../models/user');
+const { checkNotAuthenticated } = require('../index');
 
 // Password validation function
 function validatePassword(password) {
@@ -24,12 +25,12 @@ function validatePassword(password) {
     return true;
 }
 
-router.get('/', (req, res) => {
+router.get('/', checkNotAuthenticated, (req, res) => {
 	res.render('register');
 });
 
 // Creating one user
-router.post('/', async (req, res) => {
+router.post('/', checkNotAuthenticated, async (req, res) => {
     const { name, email, pwd, rep_pwd } = req.body;
 
     // Verify passwords match
