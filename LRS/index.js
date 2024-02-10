@@ -6,6 +6,7 @@ if (process.env.NODE_ENV !== 'production') {
 const express = require('express');
 const flash = require('express-flash');
 const session = require('express-session');
+const methodOverride = require('method-override');
 const mongoose = require('mongoose');
 const passport = require('passport');
 const User = require('./models/user');
@@ -39,6 +40,21 @@ const getUserByEmail = async (email) => {
     }
 };
 
+const getUserById = async (id) => {
+    try {
+        const user = await User.findById(id);
+        return user;
+    } catch (error) {
+        console.error('Error finding user by ID:', error);
+        return null;
+    }
+};
+
+initializePassport(passport, getUserByEmail, getUserById);
+app.use(passport.initialize());
+app.use(passport.session());
+app.use(methodOverride('_method'));
+
 function checkAuthenticated(req, res, next) {
 	if (req.isAuthenticated()) {
 		return next();
@@ -57,20 +73,6 @@ function checkNotAuthenticated(req, res, next) {
 
 module.exports.checkAuthenticated = checkAuthenticated;
 module.exports.checkNotAuthenticated = checkNotAuthenticated;
-
-const getUserById = async (id) => {
-    try {
-        const user = await User.findById(id);
-        return user;
-    } catch (error) {
-        console.error('Error finding user by ID:', error);
-        return null;
-    }
-};
-
-initializePassport(passport, getUserByEmail, getUserById);
-app.use(passport.initialize());
-app.use(passport.session());
 
 // Mongo config
 mongoose.connect(process.env.DATABASE_URL);
@@ -98,6 +100,11 @@ app.use('/statements', statementsRouter);
 // Router for login
 const loginRouter = require('./routes/login');
 app.use('/login', loginRouter);
+
+// Router for logout
+const logoutRouter = require('./routes/logout');
+app.use('/logout', logoutRouter);
+
 
 // Router for register
 const registerRouter = require('./routes/register');
