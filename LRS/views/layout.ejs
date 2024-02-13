@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jaxpi LRS</title>
+</head>
+<body>
+    <div class="navbar">
+        <div class="left">
+            <a href="/users">Users</a>
+            <a href="/statements">Statements</a>
+        </div>
+        <div class="right">
+            <% if (user) { %>
+                <p>Welcome <%= user.name %></p>
+                <form action="/logout?_method=DELETE" method="POST">
+                    <button type="submit">Log out</button>
+                </form>
+            <% } else { %>
+                <a href="/login">Log in</a>
+                <a href="/register">Register</a>
+            <% } %>
+        </div>
+    </div>
+    <div class="content">
+        <%= body %>
+    </div>
+</body>
+</html>
