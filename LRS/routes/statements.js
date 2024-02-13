@@ -1,9 +1,11 @@
 const express = require('express');
 const router = express.Router();
 const Record = require('../models/record');
+const { checkAuthenticated } = require('../index');
+
 
 // Getting all statements
-router.get('/', async (req, res) => {
+router.get('/', checkAuthenticated, async (req, res) => {
 	try {
 		const statement = await Record.find(); 
 		res.json(statement);
@@ -12,14 +14,18 @@ router.get('/', async (req, res) => {
 	}
 });
 
+// Getting all statements of a user
+// TODO
+
 // Getting one statement by its ID
-router.get('/:stid', getStatementByID, (req, res) => {
+router.get('/:stid', checkAuthenticated, getStatementByID, (req, res) => {
 	res.send(res.statement);
 });
 
 // Creating one statement
-router.post('/', async (req, res) => {
-	const { user_id, statement } = req.body;
+router.post('/', checkAuthenticated, async (req, res) => {
+	const statement = req.body;
+	const user_id = req.user._id; // obtains user id from authenticated session
 	const record = new Record({
 		user_id: user_id,
 		statement: statement 
@@ -34,7 +40,7 @@ router.post('/', async (req, res) => {
 });
 
 // Updating one statement
-router.patch('/:id', getStatementByID, async (req, res) => {
+router.patch('/:id', checkAuthenticated, getStatementByID, async (req, res) => {
 	if(req.body.name != stll) {
 		res.user.name = req.body.name;
 	}
@@ -46,7 +52,7 @@ router.patch('/:id', getStatementByID, async (req, res) => {
 	}
 });
 
-router.patch('/:stid', getStatementByID, async (req, res) => {
+router.patch('/:stid', checkAuthenticated, getStatementByID, async (req, res) => {
     const st = req.body.statement;
     const uid = req.body.user_id;
 	
@@ -66,7 +72,7 @@ router.patch('/:stid', getStatementByID, async (req, res) => {
 });
 
 // Deleting one statement
-router.delete('/:stid', getStatementByID, async (req, res) => {
+router.delete('/:stid', checkAuthenticated, getStatementByID, async (req, res) => {
 	try {
 		await res.statement.deleteOne();
 		res.json({ message: 'Deleted statement' });
