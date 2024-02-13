@@ -15,7 +15,16 @@ router.get('/', checkAuthenticated, async (req, res) => {
 });
 
 // Getting all statements of a user
-// TODO
+router.get('/:uid', checkAuthenticated, async (req, res) => {
+    const userId = req.params.uid;
+
+    try {
+        const statements = await Record.find({ user_id: userId });
+        res.json(statements);
+    } catch(err) {
+        res.status(500).json({ message: err.message });
+    }
+});
 
 // Getting one statement by its ID
 router.get('/:stid', checkAuthenticated, getStatementByID, (req, res) => {
