@@ -111,7 +111,7 @@ app.use('/register', registerRouter);
 
 // ejs
 app.get('/', checkAuthenticated, (req, res) => {
-	res.render('index.ejs', { name: req.user.name });
+	res.render('index.ejs', { user: req.user });
 });
 
 app.listen(port, () => {

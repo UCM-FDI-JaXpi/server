@@ -12,7 +12,7 @@
             <a href="/statements">Statements</a>
         </div>
         <div class="right">
-            <% if (user) { %>
+            <% if (typeof user !== 'undefined' && user) { %>
                 <p>Welcome <%= user.name %></p>
                 <form action="/logout?_method=DELETE" method="POST">
                     <button type="submit">Log out</button>
@@ -22,9 +22,6 @@
                 <a href="/register">Register</a>
             <% } %>
         </div>
-    </div>
-    <div class="content">
-        <%= body %>
     </div>
 </body>
 </html>
