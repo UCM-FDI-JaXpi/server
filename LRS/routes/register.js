@@ -54,7 +54,7 @@ router.post('/', checkNotAuthenticated, async (req, res) => {
 
 
         // Create user
-		const password = await bcrypt.hash(pwd, 10);
+		const password = await bcrypt.hash(pwd, process.env.BCRYPT_SALT); // TODO: almacenar en servidor	
         const newUser = new User({ name, email, password });
         await newUser.save();
 
