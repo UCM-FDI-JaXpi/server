@@ -32,7 +32,7 @@ router.get('/:stid', checkAuthenticated, getStatementByID, (req, res) => {
 });
 
 // Creating one statement
-router.post('/', checkAuthenticated, async (req, res) => {
+router.post('/', async (req, res) => {
 	const statement = req.body;
 	const user_id = req.user._id; // obtains user id from authenticated session
 	const record = new Record({
