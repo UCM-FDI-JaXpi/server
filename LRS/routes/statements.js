@@ -3,7 +3,6 @@ const router = express.Router();
 const Record = require('../models/record');
 const { checkAuthenticated } = require('../index');
 
-
 // Getting all statements
 router.get('/', checkAuthenticated, async (req, res) => {
 	try {
