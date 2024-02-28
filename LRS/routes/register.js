@@ -31,7 +31,7 @@ router.get('/', checkNotAuthenticated, (req, res) => {
 
 // Creating one user
 router.post('/', checkNotAuthenticated, async (req, res) => {
-    const { name, email, pwd, rep_pwd } = req.body;
+    const { name, email, pwd, rep_pwd, usr_type } = req.body;
 
     // Verify passwords match
     if (pwd !== rep_pwd) {
@@ -55,7 +55,7 @@ router.post('/', checkNotAuthenticated, async (req, res) => {
 
         // Create user
 		const password = await bcrypt.hash(pwd, process.env.BCRYPT_SALT); // TODO: almacenar en servidor	
-        const newUser = new User({ name, email, password });
+        const newUser = new User({ name, email, password, usr_type });
         await newUser.save();
 
 		res.redirect('/login');
