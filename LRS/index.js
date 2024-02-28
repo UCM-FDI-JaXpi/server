@@ -94,7 +94,7 @@ const recordsRouter = require('./routes/users');
 app.use('/users', recordsRouter);
 
 // Router for statement petitions
-const statementsRouter = require('./routes/statements');
+const statementsRouter = require('./routes/records');
 app.use('/statements', statementsRouter);
 
 // Router for login
