@@ -55,7 +55,6 @@ router.post('/', checkNotAuthenticated, async (req, res) => {
 
         // Create user
 		const salt = Number(process.env.BCRYPT_SALT);
-		console.log(salt);
 		const password = await bcrypt.hash(pwd, salt); // TODO: almacenar en servidor	
         const newUser = new User({ name, email, password, usr_type });
         await newUser.save();
@@ -63,8 +62,7 @@ router.post('/', checkNotAuthenticated, async (req, res) => {
 		res.redirect('/login');
 
     } catch (error) {
-		res.status(400).json({ message: error.message }); 
-		// res.redirect('/register');
+		res.redirect('/register');
     }
 });
 
