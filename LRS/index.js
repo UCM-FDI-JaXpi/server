@@ -90,12 +90,12 @@ app.use(express.json());
 // Routers
 
 // Router for user petitions
-const recordsRouter = require('./routes/users');
-app.use('/users', recordsRouter);
+const usersRouter = require('./routes/users');
+app.use('/users', usersRouter);
 
 // Router for statement petitions
-const statementsRouter = require('./routes/records');
-app.use('/statements', statementsRouter);
+const recordsRouter = require('./routes/records');
+app.use('/records', recordsRouter);
 
 // Router for login
 const loginRouter = require('./routes/login');
