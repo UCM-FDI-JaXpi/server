@@ -38,7 +38,10 @@ const recordSchema = new mongoose.Schema({
 		extensions: { type: Object }
 	},
 	timestamp: { type: Date, required: true },
-	stored: { type: Date, required: true },
+	stored: { 
+		type: Date,
+		default: Date.now
+	 },
 	authority: {
 		name: { type: String },
 		mbox: { type: String }
