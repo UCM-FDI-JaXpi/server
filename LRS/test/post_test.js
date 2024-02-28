@@ -48,7 +48,7 @@ async function createStatement() {
     try {
         const response = await axios.post('http://localhost:3000/statements', {
             user_id: user_id,
-            statement: statement
+            statement: statement	
         });
         console.log('Statement created:', response.data);
     } catch (error) {
