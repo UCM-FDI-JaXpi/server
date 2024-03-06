@@ -71,8 +71,19 @@ function checkNotAuthenticated(req, res, next) {
 	return next();
 }
 
+function getUserType(req) {
+    if (req.isAuthenticated()) {
+        const user = req.user;
+        const userType = user.usr_type;
+        return userType;
+    } else {
+        return 'guest';
+    }
+}
+
 module.exports.checkAuthenticated = checkAuthenticated;
 module.exports.checkNotAuthenticated = checkNotAuthenticated;
+module.exports.getUserType = getUserType;
 
 // Mongo config
 mongoose.connect(process.env.DATABASE_URL);
