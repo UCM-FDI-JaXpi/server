@@ -1,33 +1,16 @@
 {
     "actor": {
-        "mbox": "mailto:sally@example.com",
-        "name": "Sally Glider",
+        "mbox": "mailto:student@gmail.com",
+        "name": "Student Glider",
         "objectType": "Agent"
     },
-    "authority": {
-        "mbox": "mailto:irene@example.com",
-        "name": "Irene Instructor",
-        "objectType": "Agent"
-    },
-    "context": {
-        "contextActivities": {
-            "grouping": {
-                "id": "http://example.com/activities/hang-gliding-school"
-            },
-            "parent": {
-                "id": "http://example.com/activities/hang-gliding-class-a"
-            }
+	"verb": {
+        "display": {
+            "en-US": "completed"
         },
-        "extensions": {
-            "http://example.com/weatherConditions": "rainy"
-        },
-        "instructor": {
-            "mbox": "mailto:irene@example.com",
-            "name": "Irene Instructor",
-            "objectType": "Agent"
-        }
+        "id": "http://adlnet.gov/expapi/verbs/completed"
     },
-    "object": {
+	"object": {
         "definition": {
             "description": {
                 "en-US": "The Solo Hang Gliding test, consisting of a timed flight from the peak of Mount Magazine"
@@ -43,6 +26,7 @@
         "id": "http://example.com/activities/hang-gliding-test",
         "objectType": "Activity"
     },
+    "timestamp": "2012-07-05T18:30:32.360Z",
     "result": {
         "completion": true,
         "extensions": {
@@ -53,12 +37,27 @@
         },
         "success": true
     },
-    "stored": "2012-07-05T18:30:33.540Z",
-    "timestamp": "2012-07-05T18:30:32.360Z",
-    "verb": {
-        "display": {
-            "en-US": "completed"
+	"context": {
+        "contextActivities": {
+            "grouping": {
+                "id": "http://example.com/activities/hang-gliding-school"
+            },
+            "parent": {
+                "id": "http://example.com/activities/hang-gliding-class-a"
+            }
         },
-        "id": "http://adlnet.gov/expapi/verbs/completed"
+        "extensions": {
+            "http://example.com/weatherConditions": "rainy"
+        },
+        "instructor": {
+            "mbox": "mailto:teacher@example.com",
+            "name": "Irene Instructor",
+            "objectType": "Agent"
+        }
+    },
+    "authority": {
+        "mbox": "mailto:teacher@example.com",
+        "name": "Irene Instructor",
+        "objectType": "Agent"
     }
 }
