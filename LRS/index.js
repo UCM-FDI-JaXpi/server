@@ -11,9 +11,6 @@ const mongoose = require('mongoose');
 const passport = require('passport');
 const User = require('./models/user');
 
-// JUST FOR LEARNING PURPOSES, to be deleted
-// const users[];
-
 // Server config
 const app = express();
 const port = 3000;
