@@ -106,7 +106,6 @@ router.get('/', checkAuthenticated, async (req, res) => {
 			]);
 			
 			// Falta "pseudonomizar" los resultados
-
 			res.json(statements);
 
 		} catch (err) {
@@ -115,18 +114,6 @@ router.get('/', checkAuthenticated, async (req, res) => {
 	}
 	else {
 		res.status(500).json({ message: 'Error finding user type' });
-	}
-});
-
-// Getting all statements of a user
-router.get('/:uid', checkAuthenticated, async (req, res) => {
-	const userId = req.params.uid;
-
-	try {
-		const statements = await Record.find({ user_id: userId });
-		res.json(statements);
-	} catch (err) {
-		res.status(500).json({ message: err.message });
 	}
 });
 
