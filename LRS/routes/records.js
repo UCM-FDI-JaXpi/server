@@ -76,12 +76,30 @@ router.get('/', checkAuthenticated, async (req, res) => {
 	}
 	else if (userType === 'dev') {
 		try {
+			// Generates a random 8 char pseudonym
+			function generateRandomPseudonym() {
+				const possibleChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+				let pseudonym = '';
+				for (let i = 0; i < 8; i++) {
+					pseudonym += possibleChars.charAt(Math.floor(Math.random() * possibleChars.length));
+				}
+				return pseudonym;
+			}
+
 			const statements = await Record.aggregate([
+				{
+					$addFields: {
+						'actor.pseudonym': generateRandomPseudonym(),
+					}
+				},
+				{
+					$unset: ["actor.name", "actor.mbox"]
+				},
 				{
 					$group: {
 						_id: {
 							parent: '$context.contextActivities.parent',
-							studentName: '$actor.name'
+							studentName: '$actor.pseudonym' // Group by pseudonym
 						},
 						statements: { $push: '$$ROOT' }
 					}
@@ -105,7 +123,6 @@ router.get('/', checkAuthenticated, async (req, res) => {
 				}
 			]);
 			
-			// Falta "pseudonomizar" los resultados
 			res.json(statements);
 
 		} catch (err) {
@@ -129,8 +146,10 @@ router.post('/', async (req, res) => {
 
 	try {
 		const newRecord = await record.save();
+		console.log("Traza recibida");
 		res.status(201).json(newRecord); // 201 means succesfully created an object
 	} catch (err) {
+		console.log("Error: " + err.message);
 		res.status(400).json({ message: err.message });
 	}
 });
