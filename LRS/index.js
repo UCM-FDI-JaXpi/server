@@ -4,6 +4,7 @@ if (process.env.NODE_ENV !== 'production') {
 }
 
 const express = require('express');
+const cors = require('cors');
 const flash = require('express-flash');
 const session = require('express-session');
 const methodOverride = require('method-override');
