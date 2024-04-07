@@ -18,6 +18,12 @@ app.use(express.urlencoded({ extended: false }));
 app.use(flash());
 app.set('view engine', 'ejs');
 
+// CORS config to allow analysis app to access database
+const allowedOrigins = ['http://localhost:3000', 'http://localhost:8080'];
+app.use(cors({
+  origin: allowedOrigins
+}));
+
 // Express sessions config
 app.use(session({
 	secret: process.env.SESSION_SECRET,
