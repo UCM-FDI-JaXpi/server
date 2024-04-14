@@ -17,12 +17,10 @@ const app = express();
 const port = 3000;
 app.use(express.urlencoded({ extended: false }));
 app.use(flash());
-app.set('view engine', 'ejs');
-
-// CORS config to allow analysis app to access database
-const allowedOrigins = ['http://localhost:3000', 'http://localhost:8080'];
 app.use(cors({
-  origin: allowedOrigins
+    origin: 'http://localhost:8080',
+    methods: ['GET', 'POST', 'PUT', 'DELETE'], 
+    credentials: true,
 }));
 
 // Express sessions config
@@ -123,11 +121,6 @@ app.use('/logout', logoutRouter);
 // Router for register
 const registerRouter = require('./routes/register');
 app.use('/register', registerRouter);
-
-// ejs
-app.get('/', checkAuthenticated, (req, res) => {
-	res.render('index.ejs', { user: req.user });
-});
 
 app.listen(port, () => {
 	console.log(`The application is listening at http://localhost:${port}`);

@@ -25,10 +25,6 @@ function validatePassword(password) {
     return true;
 }
 
-router.get('/', checkNotAuthenticated, (req, res) => {
-	res.render('register');
-});
-
 // Creating one user
 router.post('/', checkNotAuthenticated, async (req, res) => {
     const { name, email, pwd, rep_pwd, usr_type } = req.body;
