@@ -4,8 +4,8 @@ const router = express.Router();
 const { checkNotAuthenticated } = require('../index');
 
 router.post('/', checkNotAuthenticated, passport.authenticate('local', {
-	successRedirect: '/',
-	failureRedirect: '/login',
+	successRedirect: 'http://localhost:8080',
+	failureRedirect: 'http://localhost:8080/login',
 	failureFlash: true
 }));
 
