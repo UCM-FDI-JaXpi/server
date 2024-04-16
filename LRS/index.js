@@ -25,6 +25,29 @@ app.use(cors({
     credentials: true,
 }));
 
+// Socket.io config
+const server = http.createServer(app);
+const io = socketIo(server, {
+	cors: {
+		origin: 'http://localhost:8080',
+		methods: ['GET', 'POST', 'PUT', 'DELETE'],
+		credentials: true,
+	}
+});
+
+io.on('connection', (socket) => {
+	console.log('A user connected');
+
+	socket.on('message', (data) => {
+        console.log('Message received:', data);
+        io.emit('message', 'Message received by server');
+    });
+
+	socket.on('disconnect', () => {
+		console.log('User disconnected');
+	});
+});
+
 // Express sessions config
 app.use(session({
 	secret: process.env.SESSION_SECRET,
@@ -138,7 +161,7 @@ app.use('/logout', logoutRouter);
 const registerRouter = require('./routes/register');
 app.use('/admin/register', checkAdmin, registerRouter);
 
-app.listen(port, () => {
+server.listen(port, () => {
 	console.log(`The application is listening at http://localhost:${port}`);
 });
 
