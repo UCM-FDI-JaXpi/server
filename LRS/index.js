@@ -122,6 +122,12 @@ function getUserType(req) {
     }
 }
 
+// Use to send user data to the frontend
+app.get('/api/session', (req, res) => {
+    res.json({ user: req.user });
+});
+
+
 module.exports.checkAuthenticated = checkAuthenticated;
 module.exports.checkNotAuthenticated = checkNotAuthenticated;
 module.exports.getUserType = getUserType;
