@@ -73,6 +73,20 @@ function checkNotAuthenticated(req, res, next) {
 	return next();
 }
 
+function checkAdmin(req, res, next) {
+    if (req.isAuthenticated()) {
+        const user = req.user;
+        if (user.usr_type === 'admin') {
+            return next();
+        } else {
+            return res.status(403).send('Forbidden');
+        }
+    } else {
+        res.redirect('/login');
+    }
+}
+
+
 function getUserType(req) {
     if (req.isAuthenticated()) {
         const user = req.user;
@@ -104,7 +118,7 @@ app.use(express.json());
 
 // Router for user petitions
 const usersRouter = require('./routes/users');
-app.use('/users', usersRouter);
+app.use('/admin/users', checkAdmin, usersRouter);
 
 // Router for statement petitions
 const recordsRouter = require('./routes/records');
@@ -120,7 +134,7 @@ app.use('/logout', logoutRouter);
 
 // Router for register
 const registerRouter = require('./routes/register');
-app.use('/register', registerRouter);
+app.use('/admin/register', checkAdmin, registerRouter);
 
 app.listen(port, () => {
 	console.log(`The application is listening at http://localhost:${port}`);
