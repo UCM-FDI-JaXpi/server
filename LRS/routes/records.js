@@ -9,7 +9,6 @@ router.get('/', checkAuthenticated, async (req, res) => {
 	if (userType === 'student') {
 		try {
 			const mbox = 'mailto:' + req.user.email;
-			console.log(mbox);
 			// Gets all statements from a student
 			const statements = await Record.find({
 				$or: [
@@ -25,7 +24,6 @@ router.get('/', checkAuthenticated, async (req, res) => {
 	else if (userType === 'teacher') {
 		try {
 			const mbox = 'mailto:' + req.user.email;
-			console.log(mbox);
 
 			/*
 			Get all statements of a teacher grouped by context.contextActivities.parent. 
@@ -131,6 +129,46 @@ router.get('/', checkAuthenticated, async (req, res) => {
 	}
 	else {
 		res.status(500).json({ message: 'Error finding user type' });
+	}
+});
+
+// Getting all statements from a specific user
+router.get('/:uname', checkAuthenticated, getStatementByID, async (req, res) => {
+	const userType = getUserType(req);
+	if (userType === 'student') {
+		if (uname === req.user.name) {
+			try {
+				// Gets all statements from a student
+				const statements = await Record.find({ 'actor.name': uname });
+				res.json(statements);
+			} catch (err) {
+				res.status(500).json({ message: err.message });
+			}
+		}
+		else {
+			res.status(403).json({ message: 'Forbidden' });
+		}
+	}
+	if (userType === 'teacher') {
+		if (uname === req.user.name) {
+			try {
+				const statements = await Record.find({
+					$and: [
+						{ 'context.instructor.name': req.user.name },
+						{ 'actor.name': uname }
+					]
+				});
+				res.json(statements);
+			} catch (err) {
+				res.status(500).json({ message: err.message });
+			}
+		}
+		else {
+			res.status(403).json({ message: 'Forbidden' });
+		}
+	}
+	if (userType === 'dev') {
+		res.status(403).json({ message: 'Forbidden' });
 	}
 });
 
