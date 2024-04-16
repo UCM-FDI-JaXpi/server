@@ -1,7 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const Record = require('../models/record');
+const { Server } = require('socket.io');
 const { checkAuthenticated, getUserType } = require('../index');
+
+const io = new Server();
 
 // Getting all statements
 router.get('/', checkAuthenticated, async (req, res) => {
@@ -16,6 +19,7 @@ router.get('/', checkAuthenticated, async (req, res) => {
 					{ 'actor.mbox': mbox }
 				]
 			});
+			io.emit('studentData', statements);
 			res.json(statements);
 		} catch (err) {
 			res.status(500).json({ message: err.message });
@@ -67,6 +71,7 @@ router.get('/', checkAuthenticated, async (req, res) => {
 				}
 			]);
 
+			io.emit('teacherData', statements);
 			res.json(statements);
 		} catch (err) {
 			res.status(500).json({ message: err.message });
@@ -121,6 +126,7 @@ router.get('/', checkAuthenticated, async (req, res) => {
 				}
 			]);
 			
+			io.emit('devData', statements);
 			res.json(statements);
 
 		} catch (err) {
@@ -140,6 +146,8 @@ router.get('/:uname', checkAuthenticated, getStatementByID, async (req, res) => 
 			try {
 				// Gets all statements from a student
 				const statements = await Record.find({ 'actor.name': uname });
+
+				io.emit('studentData', statements);
 				res.json(statements);
 			} catch (err) {
 				res.status(500).json({ message: err.message });
@@ -158,6 +166,8 @@ router.get('/:uname', checkAuthenticated, getStatementByID, async (req, res) => 
 						{ 'actor.name': uname }
 					]
 				});
+
+				io.emit('studentData', statements);
 				res.json(statements);
 			} catch (err) {
 				res.status(500).json({ message: err.message });
@@ -185,6 +195,8 @@ router.post('/', async (req, res) => {
 	try {
 		const newRecord = await record.save();
 		console.log("Traza recibida");
+
+		io.emit('newData', newRecord);
 		res.status(201).json(newRecord); // 201 means succesfully created an object
 	} catch (err) {
 		console.log("Error: " + err.message);
