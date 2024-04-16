@@ -89,12 +89,13 @@ function checkAuthenticated(req, res, next) {
 		return next();
 	}
 
-	res.redirect('login');
+	console.log('User not authenticated');
+	res.redirect('http://localhost:8080/login');
 }
 
 function checkNotAuthenticated(req, res, next) {
 	if (req.isAuthenticated()) {
-		res.redirect('/');
+		res.redirect('http://localhost:8080');
 	}
 
 	return next();
@@ -109,7 +110,7 @@ function checkAdmin(req, res, next) {
             return res.status(403).send('Forbidden');
         }
     } else {
-        res.redirect('/login');
+        res.redirect('http://localhost:8080/login');
     }
 }
 
