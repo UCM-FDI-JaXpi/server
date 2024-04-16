@@ -48,6 +48,8 @@ io.on('connection', (socket) => {
 	});
 });
 
+module.exports.io = io;
+
 // Express sessions config
 app.use(session({
 	secret: process.env.SESSION_SECRET,
