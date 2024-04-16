@@ -1,10 +1,9 @@
 const express = require('express');
 const router = express.Router();
 const Record = require('../models/record');
-const { Server } = require('socket.io');
 const { checkAuthenticated, getUserType } = require('../index');
 
-const io = new Server();
+const { io } = require('../index'); 
 
 // Getting all statements
 router.get('/', checkAuthenticated, async (req, res) => {
