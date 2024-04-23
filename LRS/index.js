@@ -38,6 +38,11 @@ const io = socketIo(server, {
 io.on('connection', (socket) => {
 	console.log('A user connected');
 
+	socket.on('authenticate', (actorName) => {
+		socket.username = actorName;
+        console.log('User ${actorName} authenticated');
+	});
+
 	socket.on('message', (data) => {
         console.log('Message received:', data);
         io.emit('message', 'Message received by server');
@@ -130,9 +135,9 @@ app.get('/api/session', (req, res) => {
     res.json({ user: req.user });
 });
 
-
 module.exports.checkAuthenticated = checkAuthenticated;
 module.exports.checkNotAuthenticated = checkNotAuthenticated;
+module.exports.checkAdmin = checkAdmin;
 module.exports.getUserType = getUserType;
 
 // Mongo config

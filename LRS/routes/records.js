@@ -190,7 +190,14 @@ router.post('/', async (req, res) => {
 		const newRecord = await record.save();
 		console.log("Traza recibida");
 
-		io.emit('newData', newRecord);
+		// Send the new statement to the socket client with the same username as the actor
+		const actorName = newRecord.actor.name;
+
+		// Find the socket with the same username as the actor
+		const connectedSocket = Object.values(io.sockets.connected).find(socket => socket.username === actorName); // 
+		if (connectedSocket) {
+			connectedSocket.emit('newData', newRecord);
+		}
 		res.status(201).json(newRecord); // 201 means succesfully created an object
 	} catch (err) {
 		console.log("Error: " + err.message);
