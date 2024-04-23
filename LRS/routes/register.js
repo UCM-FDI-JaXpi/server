@@ -34,6 +34,11 @@ router.post('/', checkNotAuthenticated, async (req, res) => {
         return res.status(400).json({ message: 'Passwords do not match' });
     }
 
+	// Verify usr_type is valid
+	if (usr_type !== 'student' && usr_type !== 'teacher' && usr_type !== 'dev') {
+		return res.status(400).json({ message: 'Invalid user type' });
+	}
+
     try {
         // Verify if the user name already exists
         const existingUser = await User.findOne({ name });
