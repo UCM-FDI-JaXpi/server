@@ -2,8 +2,7 @@ const express = require('express');
 const router = express.Router();
 const Record = require('../models/record');
 const { checkAuthenticated, getUserType } = require('../index');
-
-const { io } = require('../index'); 
+const { io } = require('../index');
 
 // Getting all statements
 router.get('/', checkAuthenticated, async (req, res) => {
@@ -124,7 +123,7 @@ router.get('/', checkAuthenticated, async (req, res) => {
 					}
 				}
 			]);
-			
+
 			io.emit('devData', statements);
 			res.json(statements);
 
@@ -190,14 +189,29 @@ router.post('/', async (req, res) => {
 		const newRecord = await record.save();
 		console.log("Traza recibida");
 
+		console.log("Entering post");
+
 		// Send the new statement to the socket client with the same username as the actor
 		const actorName = newRecord.actor.name;
+		console.log("Trying to send data to: " + actorName);
 
 		// Find the socket with the same username as the actor
-		const connectedSocket = Object.values(io.sockets.connected).find(socket => socket.username === actorName); // 
+		let connectedSocket;
+		io.sockets.sockets.forEach(socket => {
+			if (socket.username === actorName) {
+				connectedSocket = socket;
+				return false;
+			}
+		});
+
 		if (connectedSocket) {
 			connectedSocket.emit('newData', newRecord);
+			console.log("Data sent to socket with username: " + actorName);
+		} else {
+			console.log("No socket found with username: " + actorName);
 		}
+
+
 		res.status(201).json(newRecord); // 201 means succesfully created an object
 	} catch (err) {
 		console.log("Error: " + err.message);

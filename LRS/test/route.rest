@@ -49,8 +49,8 @@ Content-Type: application/json
 
 {
     "actor": {
-        "mbox": "mailto:student4@gmail.com",
-        "name": "Manuela",
+        "mbox": "mailto:maru@example.com",
+        "name": "maru",
         "objectType": "Agent"
     },
 	"verb": {

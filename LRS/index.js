@@ -38,9 +38,17 @@ const io = socketIo(server, {
 io.on('connection', (socket) => {
 	console.log('A user connected');
 
+	console.log('Sockets size: ', io.sockets.sockets.size);
+	console.log('Sockets: ', io.sockets.sockets);
+
 	socket.on('authenticate', (actorName) => {
+		console.log('actorName:', actorName);
 		socket.username = actorName;
-        console.log('User ${actorName} authenticated');
+		console.log('socket.username:', socket.username);
+        console.log(`User ${actorName} authenticated`);
+
+		console.log('Sockets size: ', io.sockets.sockets.size);
+		console.log('Sockets: ', io.sockets.sockets);
 	});
 
 	socket.on('message', (data) => {
