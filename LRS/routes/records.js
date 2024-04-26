@@ -1,3 +1,7 @@
+if (process.env.NODE_ENV !== 'production') {
+	require('dotenv').config();
+}
+
 const express = require('express');
 const router = express.Router();
 const Record = require('../models/record');
@@ -180,8 +184,23 @@ router.get('/:uname', checkAuthenticated, async (req, res) => {
 	}
 });
 
+// Post token verification middleware
+const verifyToken = (req, res, next) => {
+    const token = req.headers['x-authentication'];
+    if (!token) {
+        return res.status(403).json({ message: 'No token provided' });
+    }
+    jwt.verify(token, process.env.SESSION_SECRET, (err, decoded) => {
+        if (err) {
+            return res.status(401).json({ message: 'Failed to authenticate token' });
+        }
+        req.username = decoded.username;
+        next();
+    });
+};
+
 // Creating one statement
-router.post('/', async (req, res) => {
+router.post('/', verifyToken, async (req, res) => {
 	const statement = req.body;
 	const record = new Record(statement);
 
