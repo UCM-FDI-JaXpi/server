@@ -20,28 +20,6 @@ const port = 3000;
 app.use(express.urlencoded({ extended: false }));
 app.use(flash());
 
-// Routes config
-
-// Router for user petitions
-const usersRouter = require('./routes/users');
-app.use('/admin/users', checkAdmin, usersRouter);
-
-// Router for statement petitions
-const recordsRouter = require('./routes/records');
-app.use('/records', recordsRouter);
-
-// Router for login
-const loginRouter = require('./routes/login');
-app.use('/login', loginRouter);
-
-// Router for logout
-const logoutRouter = require('./routes/logout');
-app.use('/logout', logoutRouter);
-
-// Router for register
-const registerRouter = require('./routes/register');
-app.use('/admin/register', checkAdmin, registerRouter);
-
 // CORS config
 // Configuración CORS permisiva para /records y /api/session
 const corsOptionsApi = {
@@ -56,9 +34,6 @@ const corsOptionsRest = {
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     credentials: true,
 };
-
-app.use('/records', cors(corsOptionsApi), recordsRouter);
-app.use(cors(corsOptionsRest));
 
 // Socket.io config
 const server = http.createServer(app);
@@ -196,9 +171,31 @@ db.once('open', () => console.log('Connected to Jaxpi Database'));
 // Make our app accept json
 app.use(express.json());
 
+// Routers
+
+// Router for user petitions
+const usersRouter = require('./routes/users');
+app.use('/admin/users', checkAdmin, usersRouter);
+
+// Router for statement petitions
+const recordsRouter = require('./routes/records');
+app.use('/records', cors(corsOptionsApi), recordsRouter);
+app.use(cors(corsOptionsRest));
+
+// Router for login
+const loginRouter = require('./routes/login');
+app.use('/login', loginRouter);
+
+// Router for logout
+const logoutRouter = require('./routes/logout');
+app.use('/logout', logoutRouter);
+
+// Router for register
+const registerRouter = require('./routes/register');
+app.use('/admin/register', checkAdmin, registerRouter);
+
 server.listen(port, () => {
 	console.log(`The application is listening at http://localhost:${port}`);
-	console.log('User: ', req.user)
 });
 
 // Not-handled errors controller
