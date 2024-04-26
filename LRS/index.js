@@ -19,11 +19,24 @@ const app = express();
 const port = 3000;
 app.use(express.urlencoded({ extended: false }));
 app.use(flash());
-app.use(cors({
-    origin: 'http://localhost:8080',
-    methods: ['GET', 'POST', 'PUT', 'DELETE'], 
+
+// CORS config
+// Configuración CORS permisiva para /records y /api/session
+const corsOptionsApi = {
+    origin: '*',
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
     credentials: true,
-}));
+};
+
+// Configuración CORS para el resto de rutas
+const corsOptionsRest = {
+    origin: [`http://localhost:${port}`, 'http://localhost:8080'],
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    credentials: true,
+};
+
+app.use('/records', cors(corsOptionsApi), recordsRouter);
+app.use(cors(corsOptionsRest));
 
 // Socket.io config
 const server = http.createServer(app);
@@ -139,7 +152,7 @@ function getUserType(req) {
 }
 
 // Use to send user data to the frontend
-app.get('/api/session', (req, res) => {
+app.get('/api/session', cors(corsOptionsApi), (req, res) => {
     res.json({ user: req.user });
 });
 
