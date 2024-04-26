@@ -25,7 +25,7 @@ router.post('/', checkNotAuthenticated, (req, res, next) => {
 				console.log('Passport info:', info);
                 return next(err);
             }
-            const token = jwt.sign({ username: user.username }, process.env.SESSION_SECRET, { expiresIn: '1h' });
+            const token = jwt.sign({ username: req.user }, process.env.SESSION_SECRET, { expiresIn: '24h' });
             return res.json({ token });
         });
     })(req, res, next);

@@ -198,6 +198,7 @@ app.use('/admin/register', checkAdmin, registerRouter);
 
 server.listen(port, () => {
 	console.log(`The application is listening at http://localhost:${port}`);
+	console.log('User: ', req.user)
 });
 
 // Not-handled errors controller
