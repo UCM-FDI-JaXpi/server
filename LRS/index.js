@@ -137,6 +137,18 @@ function checkAdmin(req, res, next) {
     }
 }
 
+function checkTeacher(req, res, next) {
+	if (req.isAuthenticated()) {
+		const user = req.user;
+		if (user.usr_type === 'teacher') {
+			return next();
+		} else {
+			return res.status(403).send('Forbidden');
+		}
+	} else {
+		res.redirect('http://localhost:8080/login');
+	}
+}
 
 function getUserType(req) {
     if (req.isAuthenticated()) {
@@ -193,6 +205,9 @@ app.use('/logout', logoutRouter);
 // Router for register
 const registerRouter = require('./routes/register');
 app.use('/admin/register', checkAdmin, registerRouter);
+
+const studentsRouter = require('./routes/students');
+app.use('/students', checkTeacher, studentsRouter);
 
 server.listen(port, () => {
 	console.log(`The application is listening at http://localhost:${port}`);
