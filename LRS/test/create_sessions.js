@@ -1,12 +1,54 @@
 const mongoose = require('mongoose');
 
-const users = [
-	{ name: 'Student1', email: 'student1@example.com', password: hash, usr_type: 'student' },
-	{ name: 'Student2', email: 'student2@example.com', password: hash, usr_type: 'student' },
-	{ name: 'Student3', email: 'student3@example.com', password: hash, usr_type: 'student' },
-	{ name: 'Teacher1', email: 'teacher1@example.com', password: hash, usr_type: 'teacher' },
-	{ name: 'Teacher2', email: 'teacher2@example.com', password: hash, usr_type: 'teacher' },
-	{ name: 'Dev', email: 'dev@example.com', password: hash, usr_type: 'dev' }
+const records = [
+	{
+		"actor": {
+			"mbox": "mailto:student1@example.com",
+			"name": "Student1",
+			"objectType": "Agent"
+		},
+		"verb": {
+			"display": {
+				"en-US": "completed"
+			},
+			"id": "http://adlnet.gov/expapi/verbs/completed"
+		},
+		"object": {
+			"definition": {
+				"description": {
+					"en-US": "The Solo Hang Gliding test, consisting of a timed flight from the peak of Mount Magazine"
+				},
+				"extensions": {
+					"http://example.com/gliderClubId": "test-435"
+				},
+				"name": {
+					"en-US": "Hang Gliding Test"
+				},
+				"type": "http://adlnet.gov/expapi/activities/assessment"
+			},
+			"id": "http://example.com/activities/hang-gliding-test",
+			"objectType": "Activity"
+		},
+		"timestamp": "2012-07-05T18:30:32.360Z",
+		"context": {
+			"contextActivities": {
+				"grouping": {
+					"id": "http://example.com/activities/hang-gliding-school"
+				},
+				"parent": {
+					"id": "http://example.com/activities/hang-gliding-class-b"
+				}
+			},
+			"extensions": {
+				"http://example.com/weatherConditions": "rainy"
+			},
+			"instructor": {
+				"mbox": "mailto:teacher1@example.com",
+				"name": "Teacher1",
+				"objectType": "Agent"
+			}
+		}
+	},
 ];
 
 // Connect to database
