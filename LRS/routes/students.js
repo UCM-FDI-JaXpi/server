@@ -27,6 +27,7 @@ async function generateStudentWithName(name) {
     let existingUser;
     do {
         // Generate username
+		// No es la manera mas elegante pero es efectiva
         username = name + Math.floor(Math.random() * 1000);
 
         // Check if username exists
