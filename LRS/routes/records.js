@@ -48,7 +48,7 @@ router.get('/', checkAuthenticated, async (req, res) => {
 				{
 					$group: {
 						_id: {
-							parent: '$context.contextActivities.parent',
+							parent: '$context.contextActivities.parent.id',
 							studentName: '$actor.name'
 						},
 						statements: { $push: '$$ROOT' }
