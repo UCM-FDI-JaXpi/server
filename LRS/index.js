@@ -25,7 +25,7 @@ app.use(flash());
 const corsOptionsApi = {
     origin: '*',
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
-    credentials: true,
+    //credentials: true,
 };
 
 // Configuración CORS para el resto de rutas
