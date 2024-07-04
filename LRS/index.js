@@ -22,11 +22,15 @@ app.use(flash());
 
 // CORS config
 // Configuración CORS permisiva para /records y /api/session
-const corsOptionsApi = {
-    origin: '*',
-    methods: ['GET', 'POST', 'PUT', 'DELETE'],
-    //credentials: true,
+// Se realiza a traves de middleware ya que es necesario para permitir todos los orígenes
+const corsOptionsApi = (req, res, next) => {
+	res.header('Access-Control-Allow-Origin', req.headers.origin);
+	res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
+	res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+	res.header('Access-Control-Allow-Credentials', 'true');
+	next();
 };
+
 
 // Configuración CORS para el resto de rutas
 const corsOptionsRest = {
@@ -185,14 +189,14 @@ app.use(express.json());
 
 // Routers
 
+// Router for statement petitions
+const recordsRouter = require('./routes/records');
+app.use('/records', corsOptionsApi, recordsRouter);
+app.use(cors(corsOptionsRest));
+
 // Router for user petitions
 const usersRouter = require('./routes/users');
 app.use('/admin/users', checkAdmin, usersRouter);
-
-// Router for statement petitions
-const recordsRouter = require('./routes/records');
-app.use('/records', cors(corsOptionsApi), recordsRouter);
-app.use(cors(corsOptionsRest));
 
 // Router for login
 const loginRouter = require('./routes/login');
