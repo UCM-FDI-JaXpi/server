@@ -31,7 +31,6 @@ const corsOptionsApi = (req, res, next) => {
 	next();
 };
 
-
 // Configuración CORS para el resto de rutas
 const corsOptionsRest = {
     origin: [`http://localhost:${port}`, 'http://localhost:8080'],
@@ -154,6 +153,21 @@ function checkTeacher(req, res, next) {
 	}
 }
 
+function checkDev(req, res, next) {	
+	if (req.isAuthenticated()) {
+		const user = req.user;
+		if (user.usr_type === 'dev') {
+			return next();
+		}
+		else {
+			return res.status(403).send('Forbidden');
+		}
+	}
+	else {
+		res.redirect('http://localhost:8080/login');
+	}
+}
+
 function getUserType(req) {
     if (req.isAuthenticated()) {
         const user = req.user;
@@ -165,7 +179,7 @@ function getUserType(req) {
 }
 
 // Use to send user data to the frontend
-app.get('/api/session', cors(corsOptionsApi), (req, res) => {
+app.get('/api/session', corsOptionsApi, (req, res) => {
     res.json({ user: req.user });
 });
 
@@ -212,6 +226,9 @@ app.use('/admin/register', checkAdmin, registerRouter);
 
 const studentsRouter = require('./routes/students');
 app.use('/students', checkTeacher, studentsRouter);
+
+const developersRouter = require('./routes/dev');
+app.use('/dev', checkDev, developersRouter);
 
 server.listen(port, () => {
 	console.log(`The application is listening at http://localhost:${port}`);
