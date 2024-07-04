@@ -2,8 +2,6 @@ const express = require('express');
 const router = express.Router();
 const Game = require('../models/game'); // Asegúrate de que la ruta sea correcta
 
-// Funciones existentes...
-
 // Obtener todos los juegos del desarrollador
 router.get('/games', async (req, res) => {
     try {
@@ -74,6 +72,21 @@ async function getGame(req, res, next) {
 
     res.game = game;
     next();
+}
+
+// Función para generar un token aleatorio
+function generateRandomToken(gameName) {
+    const characters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    let token = gameName.replace(/\s/g, '') + '-';
+    for (let i = 0; i < 5; i++) {
+        for (let j = 0; j < 5; j++) {
+            token += characters.charAt(Math.floor(Math.random() * characters.length));
+        }
+        if (i < 4) {
+            token += '-';
+        }
+    }
+    return token;
 }
 
 module.exports = router;
