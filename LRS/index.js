@@ -114,12 +114,12 @@ function checkAuthenticated(req, res, next) {
 	}
 
 	console.log('User not authenticated');
-	res.redirect('http://localhost:8080/login');
+	res.response(401).send('Unauthorized: User not authenticated');
 }
 
 function checkNotAuthenticated(req, res, next) {
 	if (req.isAuthenticated()) {
-		res.redirect('http://localhost:8080');
+		res.response(401).send('Unauthorized: User already authenticated');
 	}
 
 	return next();
@@ -131,10 +131,10 @@ function checkAdmin(req, res, next) {
         if (user.usr_type === 'admin') {
             return next();
         } else {
-            return res.status(403).send('Forbidden');
+            return res.status(403).send('Forbidden: User not an admin');
         }
     } else {
-        res.redirect('http://localhost:8080/login');
+        res.response(401).send('Unauthorized: User not authenticated');
     }
 }
 
@@ -144,10 +144,10 @@ function checkTeacher(req, res, next) {
 		if (user.usr_type === 'teacher') {
 			return next();
 		} else {
-			return res.status(403).send('Forbidden');
+			return res.status(403).send('Forbidden: User not a teacher');
 		}
 	} else {
-		res.redirect('http://localhost:8080/login');
+		res.response(401).send('Unauthorized: User not authenticated');
 	}
 }
 
@@ -158,11 +158,11 @@ function checkDev(req, res, next) {
 			return next();
 		}
 		else {
-			return res.status(403).send('Forbidden');
+			return res.status(403).send('Forbidden: User not a developer');
 		}
 	}
 	else {
-		res.redirect('http://localhost:8080/login');
+		res.response(401).send('Unauthorized: User not authenticated');
 	}
 }
 
