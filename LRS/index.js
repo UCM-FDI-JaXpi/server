@@ -21,7 +21,7 @@ app.use(flash());
 
 // Middleware personalizado para CORS permisivo
 const permissiveCorsMiddleware = (req, res, next) => {
-    res.header('Access-Control-Allow-Origin', req.headers.origin || '*');
+    res.header('Access-Control-Allow-Origin', req.headers.origin);
     res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
     res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
     res.header('Access-Control-Allow-Credentials', 'true');
