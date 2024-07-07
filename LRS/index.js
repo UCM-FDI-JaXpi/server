@@ -21,15 +21,18 @@ app.use(flash());
 
 // Middleware personalizado para CORS permisivo
 const permissiveCorsMiddleware = (req, res, next) => {
-    res.header('Access-Control-Allow-Origin', req.headers.origin || 'http://localhost:8080');
-    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
+    res.header('Access-Control-Allow-Origin', req.headers.origin || '*');
+    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
     res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
     res.header('Access-Control-Allow-Credentials', 'true');
-    if (req.method === 'OPTIONS') {
-        res.sendStatus(200);
-    } else {
-        next();
+};
+
+// Middleware para registrar errores de CORS
+const logCorsErrorsMiddleware = (err, req, res, next) => {
+    if (err && err.name === 'CorsError') {
+        console.error(`CORS error for request to ${req.originalUrl} from origin ${req.headers.origin}: ${err.message}`);
     }
+    next(err);
 };
 
 // Configuración CORS para el resto de rutas
@@ -177,8 +180,12 @@ function getUserType(req) {
     }
 }
 
+// Middleware para aplicar CORS permisivo a rutas específicas
+app.use('/records', permissiveCorsMiddleware, logCorsErrorsMiddleware);
+app.use('/api/session', permissiveCorsMiddleware, logCorsErrorsMiddleware);
+
 // Use to send user data to the frontend
-app.get('/api/session', permissiveCorsMiddleware, (req, res) => {
+app.get('/api/session', (req, res) => {
     res.json({ user: req.user });
 });
 
@@ -204,7 +211,7 @@ app.use(express.json());
 
 // Router for statement petitions
 const recordsRouter = require('./routes/records');
-app.use('/records', permissiveCorsMiddleware, recordsRouter);
+app.use('/records', recordsRouter);
 app.use(cors(corsOptionsRest));
 
 // Router for user petitions
