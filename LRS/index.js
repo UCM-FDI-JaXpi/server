@@ -1,6 +1,6 @@
 // index.js
 if (process.env.NODE_ENV !== 'production') {
-    require('dotenv').config();
+	require('dotenv').config();
 }
 
 const express = require('express');
@@ -21,59 +21,66 @@ app.use(express.urlencoded({ extended: false }));
 app.use(flash());
 
 // CORS config
-
-const corsOptions = {
-    origin: ['http://localhost:8080', 'http://localhost:3000'],
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'], // Permitir todos los métodos
-    allowedHeaders: ['Origin', 'X-Requested-With', 'Content-Type', 'Accept'], // Permitir todas las cabeceras
-    credentials: true // Permitir credenciales
+// Configuración CORS permisiva para /records y /api/session
+// Se realiza a traves de middleware ya que es necesario para permitir todos los orígenes
+const corsOptionsApi = (req, res, next) => {
+	res.header('Access-Control-Allow-Origin', req.headers.origin, 'http://localhost:8080', 'http://localhost:3000');
+	res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE', 'OPTIONS');
+	res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+	res.header('Access-Control-Allow-Credentials', 'true');
+	next();
 };
 
-app.use(cors(corsOptions));
+// Configuración CORS para el resto de rutas
+const corsOptionsRest = {
+    origin: [`http://localhost:${port}`, 'http://localhost:8080'],
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    credentials: true,
+};
 
 // Socket.io config
 const server = http.createServer(app);
 const io = socketIo(server, {
-    cors: {
-        origin: ['http://localhost:8080', 'http://localhost:3000'], // Permitir todas las orígenes
-        methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'], // Permitir todos los métodos
-        credentials: true // Permitir credenciales
-    }
+	cors: {
+		origin: ['http://localhost:8080', 'http://localhost:3000'],
+		methods: ['GET', 'POST', 'PUT', 'DELETE'],
+		credentials: true,
+	}
 });
 
 io.on('connection', (socket) => {
-    console.log('A user connected');
+	console.log('A user connected');
 
-    console.log('Sockets size: ', io.sockets.sockets.size);
-    console.log('Sockets: ', io.sockets.sockets);
+	console.log('Sockets size: ', io.sockets.sockets.size);
+	console.log('Sockets: ', io.sockets.sockets);
 
-    socket.on('authenticate', (actorName) => {
-        console.log('actorName:', actorName);
-        socket.username = actorName;
-        console.log('socket.username:', socket.username);
+	socket.on('authenticate', (actorName) => {
+		console.log('actorName:', actorName);
+		socket.username = actorName;
+		console.log('socket.username:', socket.username);
         console.log(`User ${actorName} authenticated`);
 
-        console.log('Sockets size: ', io.sockets.sockets.size);
-        console.log('Sockets: ', io.sockets.sockets);
-    });
+		console.log('Sockets size: ', io.sockets.sockets.size);
+		console.log('Sockets: ', io.sockets.sockets);
+	});
 
-    socket.on('message', (data) => {
+	socket.on('message', (data) => {
         console.log('Message received:', data);
         io.emit('message', 'Message received by server');
     });
 
-    socket.on('disconnect', () => {
-        console.log('User disconnected');
-    });
+	socket.on('disconnect', () => {
+		console.log('User disconnected');
+	});
 });
 
 module.exports.io = io;
 
 // Express sessions config
 app.use(session({
-    secret: process.env.SESSION_SECRET,
-    resave: false,
-    saveUninitialized: false
+	secret: process.env.SESSION_SECRET,
+	resave: false,
+	saveUninitialized: false
 }));
 
 // Passport config
@@ -104,20 +111,20 @@ app.use(passport.session());
 app.use(methodOverride('_method'));
 
 function checkAuthenticated(req, res, next) {
-    if (req.isAuthenticated()) {
-        return next();
-    }
+	if (req.isAuthenticated()) {
+		return next();
+	}
 
-    console.log('User not authenticated');
-    res.redirect('http://localhost:8080/login');
+	console.log('User not authenticated');
+	res.redirect('http://localhost:8080/login');
 }
 
 function checkNotAuthenticated(req, res, next) {
-    if (req.isAuthenticated()) {
-        res.redirect('http://localhost:8080');
-    }
+	if (req.isAuthenticated()) {
+		res.redirect('http://localhost:8080');
+	}
 
-    return next();
+	return next();
 }
 
 function checkAdmin(req, res, next) {
@@ -134,31 +141,31 @@ function checkAdmin(req, res, next) {
 }
 
 function checkTeacher(req, res, next) {
-    if (req.isAuthenticated()) {
-        const user = req.user;
-        if (user.usr_type === 'teacher') {
-            return next();
-        } else {
-            return res.status(403).send('Forbidden');
-        }
-    } else {
-        res.redirect('http://localhost:8080/login');
-    }
+	if (req.isAuthenticated()) {
+		const user = req.user;
+		if (user.usr_type === 'teacher') {
+			return next();
+		} else {
+			return res.status(403).send('Forbidden');
+		}
+	} else {
+		res.redirect('http://localhost:8080/login');
+	}
 }
 
-function checkDev(req, res, next) {    
-    if (req.isAuthenticated()) {
-        const user = req.user;
-        if (user.usr_type === 'dev') {
-            return next();
-        }
-        else {
-            return res.status(403).send('Forbidden');
-        }
-    }
-    else {
-        res.redirect('http://localhost:8080/login');
-    }
+function checkDev(req, res, next) {	
+	if (req.isAuthenticated()) {
+		const user = req.user;
+		if (user.usr_type === 'dev') {
+			return next();
+		}
+		else {
+			return res.status(403).send('Forbidden');
+		}
+	}
+	else {
+		res.redirect('http://localhost:8080/login');
+	}
 }
 
 function getUserType(req) {
@@ -172,7 +179,7 @@ function getUserType(req) {
 }
 
 // Use to send user data to the frontend
-app.get('/api/session', (req, res) => {
+app.get('/api/session', corsOptionsApi, (req, res) => {
     res.json({ user: req.user });
 });
 
@@ -198,7 +205,8 @@ app.use(express.json());
 
 // Router for statement petitions
 const recordsRouter = require('./routes/records');
-app.use('/records', recordsRouter);
+app.use('/records', corsOptionsApi, recordsRouter);
+app.use(cors(corsOptionsRest));
 
 // Router for user petitions
 const usersRouter = require('./routes/users');
@@ -223,11 +231,11 @@ const developersRouter = require('./routes/dev');
 app.use('/dev', checkDev, developersRouter);
 
 server.listen(port, () => {
-    console.log(`The application is listening at http://localhost:${port}`);
+	console.log(`The application is listening at http://localhost:${port}`);
 });
 
 // Not-handled errors controller
 app.use((err, req, res, next) => {
-    console.error(err.stack);
-    res.status(500).send('Something went wrong!');
+	console.error(err.stack);
+	res.status(500).send('Something went wrong!');
 });
