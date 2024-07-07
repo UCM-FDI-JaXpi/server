@@ -21,8 +21,16 @@ app.use(express.urlencoded({ extended: false }));
 app.use(flash());
 
 // CORS config
+const allowedOrigins = ['http://localhost:8080'];
+
 const corsOptions = {
-    origin: '*', // Permitir todas las orígenes
+    origin: (origin, callback) => {
+        if (allowedOrigins.includes(origin) || !origin) {
+            callback(null, true);
+        } else {
+            callback(new Error('Not allowed by CORS'));
+        }
+    },
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'], // Permitir todos los métodos
     allowedHeaders: ['Origin', 'X-Requested-With', 'Content-Type', 'Accept'], // Permitir todas las cabeceras
     credentials: true // Permitir credenciales
