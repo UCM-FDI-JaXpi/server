@@ -23,13 +23,11 @@ app.use(flash());
 // CORS config
 // Configuración CORS permisiva para /records y /api/session
 // Se realiza a traves de middleware ya que es necesario para permitir todos los orígenes
-const corsOptionsApi = (req, res, next) => {
-	res.header('Access-Control-Allow-Origin', req.headers.origin, 'http://localhost:8080', 'http://localhost:3000');
-	res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE', 'OPTIONS');
-	res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
-	res.header('Access-Control-Allow-Credentials', 'true');
-	next();
-};
+const corsOptionsApi = {
+		origin: [`http://localhost:${port}`, 'http://localhost:8080'],
+		methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+		credentials: true,
+	};
 
 // Configuración CORS para el resto de rutas
 const corsOptionsRest = {
