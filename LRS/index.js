@@ -24,10 +24,10 @@ app.use(flash());
 // Configuración CORS permisiva para /records y /api/session
 // Se realiza a traves de middleware ya que es necesario para permitir todos los orígenes
 const corsOptionsApi = {
-		origin: [`http://localhost:${port}`, 'http://localhost:8080'],
-		methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-		credentials: true,
-	};
+    origin: [`http://localhost:${port}`, 'http://localhost:8080'],
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    credentials: true,
+};
 
 // Configuración CORS para el resto de rutas
 const corsOptionsRest = {
@@ -177,7 +177,7 @@ function getUserType(req) {
 }
 
 // Use to send user data to the frontend
-app.get('/api/session', corsOptionsApi, (req, res) => {
+app.get('/api/session', cors(corsOptionsApi), (req, res) => {
     res.json({ user: req.user });
 });
 
@@ -203,7 +203,7 @@ app.use(express.json());
 
 // Router for statement petitions
 const recordsRouter = require('./routes/records');
-app.use('/records', corsOptionsApi, recordsRouter);
+app.use('/records', cors(corsOptionsApi), recordsRouter);
 app.use(cors(corsOptionsRest));
 
 // Router for user petitions
