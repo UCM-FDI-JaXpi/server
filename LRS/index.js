@@ -1,3 +1,4 @@
+// index.js
 if (process.env.NODE_ENV !== 'production') {
     require('dotenv').config();
 }
@@ -19,36 +20,23 @@ const port = 3000;
 app.use(express.urlencoded({ extended: false }));
 app.use(flash());
 
-// Middleware personalizado para CORS permisivo
-const permissiveCorsMiddleware = (req, res, next) => {
-    res.header('Access-Control-Allow-Origin', req.headers.origin || '*');
-    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
-    res.header('Access-Control-Allow-Credentials', 'true');
+// CORS config
+const corsOptions = {
+    origin: '*', // Permitir todas las orígenes
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'], // Permitir todos los métodos
+    allowedHeaders: ['Origin', 'X-Requested-With', 'Content-Type', 'Accept'], // Permitir todas las cabeceras
+    credentials: true // Permitir credenciales
 };
 
-// Middleware para registrar errores de CORS
-const logCorsErrorsMiddleware = (err, req, res, next) => {
-    if (err && err.name === 'CorsError') {
-        console.error(`CORS error for request to ${req.originalUrl} from origin ${req.headers.origin}: ${err.message}`);
-    }
-    next(err);
-};
-
-// Configuración CORS para el resto de rutas
-const corsOptionsRest = {
-    origin: [`http://localhost:${port}`, 'http://localhost:8080'],
-    methods: ['GET', 'POST', 'PUT', 'DELETE'],
-    credentials: true,
-};
+app.use(cors(corsOptions));
 
 // Socket.io config
 const server = http.createServer(app);
 const io = socketIo(server, {
     cors: {
-        origin: 'http://localhost:8080',
-        methods: ['GET', 'POST', 'PUT', 'DELETE'],
-        credentials: true,
+        origin: '*', // Permitir todas las orígenes
+        methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'], // Permitir todos los métodos
+        credentials: true // Permitir credenciales
     }
 });
 
@@ -162,10 +150,12 @@ function checkDev(req, res, next) {
         const user = req.user;
         if (user.usr_type === 'dev') {
             return next();
-        } else {
+        }
+        else {
             return res.status(403).send('Forbidden');
         }
-    } else {
+    }
+    else {
         res.redirect('http://localhost:8080/login');
     }
 }
@@ -179,10 +169,6 @@ function getUserType(req) {
         return 'guest';
     }
 }
-
-// Middleware para aplicar CORS permisivo a rutas específicas
-app.use('/records', permissiveCorsMiddleware, logCorsErrorsMiddleware);
-app.use('/api/session', permissiveCorsMiddleware, logCorsErrorsMiddleware);
 
 // Use to send user data to the frontend
 app.get('/api/session', (req, res) => {
@@ -212,7 +198,6 @@ app.use(express.json());
 // Router for statement petitions
 const recordsRouter = require('./routes/records');
 app.use('/records', recordsRouter);
-app.use(cors(corsOptionsRest));
 
 // Router for user petitions
 const usersRouter = require('./routes/users');
