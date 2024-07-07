@@ -4,6 +4,7 @@ if (process.env.NODE_ENV !== 'production') {
 
 const express = require('express');
 const router = express.Router();
+const jwt = require('jsonwebtoken');
 const Record = require('../models/record');
 const { checkAuthenticated, getUserType } = require('../index');
 const { io } = require('../index');
