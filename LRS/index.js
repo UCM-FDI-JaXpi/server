@@ -21,7 +21,7 @@ app.use(express.urlencoded({ extended: false }));
 app.use(flash());
 
 // CORS config
-const allowedOrigins = ['http://localhost:8080'];
+const allowedOrigins = ['http://localhost:8080', 'http://localhost:3000'];
 
 const corsOptions = {
     origin: (origin, callback) => {
