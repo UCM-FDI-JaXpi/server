@@ -35,7 +35,7 @@ app.use(cors(corsOptions));
 const server = http.createServer(app);
 const io = socketIo(server, {
     cors: {
-        origin: '*', // Permitir todas las orígenes
+        origin: ['http://localhost:8080', 'http://localhost:3000'], // Permitir todas las orígenes
         methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'], // Permitir todos los métodos
         credentials: true // Permitir credenciales
     }
