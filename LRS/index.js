@@ -18,6 +18,10 @@ const User = require('./models/user');
 const app = express();
 const port = process.env.PORT || 3000;
 const frontPort = process.env.FRONT_PORT || 8080;
+
+console.log('Backend port:', port);
+console.log('Frontend port:', frontPort);
+
 app.use(express.urlencoded({ extended: false }));
 app.use(flash());
 
@@ -36,6 +40,7 @@ const corsOptionsRest = {
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     credentials: true,
 };
+
 
 // Socket.io config
 const server = http.createServer(app);
@@ -115,12 +120,12 @@ function checkAuthenticated(req, res, next) {
 	}
 
 	console.log('User not authenticated');
-	res.status(401).send('Unauthorized: User not authenticated');
+	return res.status(401).send('Unauthorized: User not authenticated');
 }
 
 function checkNotAuthenticated(req, res, next) {
 	if (req.isAuthenticated()) {
-		res.status(401).send('Unauthorized: User already authenticated');
+		return res.status(401).send('Unauthorized: User already authenticated');
 	}
 
 	return next();
@@ -135,7 +140,7 @@ function checkAdmin(req, res, next) {
             return res.status(403).send('Forbidden: User not an admin');
         }
     } else {
-        res.status(401).send('Unauthorized: User not authenticated');
+        return res.status(401).send('Unauthorized: User not authenticated');
     }
 }
 
@@ -148,7 +153,7 @@ function checkTeacher(req, res, next) {
 			return res.status(403).send('Forbidden: User not a teacher');
 		}
 	} else {
-		res.status(401).send('Unauthorized: User not authenticated');
+		return res.status(401).send('Unauthorized: User not authenticated');
 	}
 }
 
@@ -163,7 +168,7 @@ function checkDev(req, res, next) {
 		}
 	}
 	else {
-		res.status(401).send('Unauthorized: User not authenticated');
+		return res.status(401).send('Unauthorized: User not authenticated');
 	}
 }
 
