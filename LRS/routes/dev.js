@@ -1,8 +1,8 @@
 const express = require('express');
 const router = express.Router();
-const Game = require('../models/game'); // Asegúrate de que la ruta sea correcta
+const Game = require('../models/game'); // Ensure the path is correct
 
-// Obtener todos los juegos del desarrollador
+// Get all games from the developer
 router.get('/games', async (req, res) => {
     try {
         const games = await Game.find();
@@ -12,17 +12,22 @@ router.get('/games', async (req, res) => {
     }
 });
 
-// Obtener un juego específico
+// Get a specific game
 router.get('/games/:id', getGame, (req, res) => {
     res.json(res.game);
 });
 
-// Crear un nuevo juego
+// Create a new game
 router.post('/games', async (req, res) => {
+	const gameID = generateRandomId();
+	const gameName = req.body.name;
+	const gameDesc = req.body.description || '';
+	const gameToken = generateRandomToken(gameName);
     const game = new Game({
-        name: req.body.name,
-        description: req.body.description || '',
-        token: generateRandomToken(),
+		id: gameID,
+        name: gameName,
+        description: gameDesc,
+        token: gameToken,
     });
     try {
         const newGame = await game.save();
@@ -32,7 +37,7 @@ router.post('/games', async (req, res) => {
     }
 });
 
-// Actualizar un juego
+// Update a game
 router.patch('/games/:id', getGame, async (req, res) => {
     if (req.body.name != null) {
         res.game.name = req.body.name;
@@ -48,7 +53,7 @@ router.patch('/games/:id', getGame, async (req, res) => {
     }
 });
 
-// Eliminar un juego
+// Delete a game
 router.delete('/games/:id', getGame, async (req, res) => {
     try {
         await res.game.remove();
@@ -58,7 +63,7 @@ router.delete('/games/:id', getGame, async (req, res) => {
     }
 });
 
-// Middleware para obtener un juego específico
+// Middleware to get a specific game
 async function getGame(req, res, next) {
     let game;
     try {
@@ -74,7 +79,12 @@ async function getGame(req, res, next) {
     next();
 }
 
-// Función para generar un token aleatorio
+// Function to generate a random ID
+function generateRandomId() {
+	return Math.floor(Math.random() * Date.now()).toString(36);
+}
+
+// Function to generate a random token
 function generateRandomToken(gameName) {
     const characters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
     let token = gameName.replace(/\s/g, '') + '-';
