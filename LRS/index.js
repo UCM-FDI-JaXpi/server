@@ -16,7 +16,8 @@ const User = require('./models/user');
 
 // Server config
 const app = express();
-const port = 3000;
+const port = proccess.env.PORT || 3000;
+const frontPort = process.env.FRONT_PORT || 8080;
 app.use(express.urlencoded({ extended: false }));
 app.use(flash());
 
@@ -24,14 +25,14 @@ app.use(flash());
 // Configuración CORS permisiva para /records y /api/session
 // Se realiza a traves de middleware ya que es necesario para permitir todos los orígenes
 const corsOptionsApi = {
-    origin: [`http://localhost:${port}`, 'http://localhost:8080'],
+    origin: [`http://localhost:${port}`, `http://localhost:${frontPort}`],
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     credentials: true,
 };
 
 // Configuración CORS para el resto de rutas
 const corsOptionsRest = {
-    origin: [`http://localhost:${port}`, 'http://localhost:8080'],
+    origin: [`http://localhost:${port}`, `http://localhost:${frontPort}`],
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     credentials: true,
 };
@@ -40,7 +41,7 @@ const corsOptionsRest = {
 const server = http.createServer(app);
 const io = socketIo(server, {
 	cors: {
-		origin: ['http://localhost:8080', 'http://localhost:3000'],
+		origin: [`http://localhost:${port}`, `http://localhost:${frontPort}`],
 		methods: ['GET', 'POST', 'PUT', 'DELETE'],
 		credentials: true,
 	}
