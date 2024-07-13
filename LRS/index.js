@@ -16,7 +16,7 @@ const User = require('./models/user');
 
 // Server config
 const app = express();
-const port = proccess.env.PORT || 3000;
+const port = process.env.PORT || 3000;
 const frontPort = process.env.FRONT_PORT || 8080;
 app.use(express.urlencoded({ extended: false }));
 app.use(flash());
