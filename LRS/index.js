@@ -115,12 +115,12 @@ function checkAuthenticated(req, res, next) {
 	}
 
 	console.log('User not authenticated');
-	res.response(401).send('Unauthorized: User not authenticated');
+	res.status(401).send('Unauthorized: User not authenticated');
 }
 
 function checkNotAuthenticated(req, res, next) {
 	if (req.isAuthenticated()) {
-		res.response(401).send('Unauthorized: User already authenticated');
+		res.status(401).send('Unauthorized: User already authenticated');
 	}
 
 	return next();
@@ -135,7 +135,7 @@ function checkAdmin(req, res, next) {
             return res.status(403).send('Forbidden: User not an admin');
         }
     } else {
-        res.response(401).send('Unauthorized: User not authenticated');
+        res.status(401).send('Unauthorized: User not authenticated');
     }
 }
 
@@ -148,7 +148,7 @@ function checkTeacher(req, res, next) {
 			return res.status(403).send('Forbidden: User not a teacher');
 		}
 	} else {
-		res.response(401).send('Unauthorized: User not authenticated');
+		res.status(401).send('Unauthorized: User not authenticated');
 	}
 }
 
@@ -163,7 +163,7 @@ function checkDev(req, res, next) {
 		}
 	}
 	else {
-		res.response(401).send('Unauthorized: User not authenticated');
+		res.status(401).send('Unauthorized: User not authenticated');
 	}
 }
 
