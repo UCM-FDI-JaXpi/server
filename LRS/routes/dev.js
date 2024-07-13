@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const Game = require('../models/game'); // Ensure the path is correct
+const Game = require('../models/game');
 
 // Get all games from the developer
 router.get('/games', async (req, res) => {
@@ -22,11 +22,13 @@ router.post('/games', async (req, res) => {
 	const gameID = generateRandomId();
 	const gameName = req.body.name;
 	const gameDesc = req.body.description || '';
+	const gameDev = req.user.name;
 	const gameToken = generateRandomToken(gameName);
     const game = new Game({
 		id: gameID,
         name: gameName,
         description: gameDesc,
+		developer: gameDev,
         token: gameToken,
     });
     try {

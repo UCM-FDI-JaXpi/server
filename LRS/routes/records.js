@@ -4,8 +4,8 @@ if (process.env.NODE_ENV !== 'production') {
 
 const express = require('express');
 const router = express.Router();
-const jwt = require('jsonwebtoken');
 const Record = require('../models/record');
+const Game = require('../models/game');
 const { checkAuthenticated, getUserType } = require('../index');
 const { io } = require('../index');
 
@@ -186,18 +186,20 @@ router.get('/:uname', checkAuthenticated, async (req, res) => {
 });
 
 // Post token verification middleware
-const verifyToken = (req, res, next) => {
+const verifyToken = async (req, res, next) => {
     const token = req.headers['x-authentication'];
     if (!token) {
         return res.status(403).json({ message: 'No token provided' });
     }
-    jwt.verify(token, process.env.SESSION_SECRET, (err, decoded) => {
-        if (err) {
-            return res.status(401).json({ message: 'Failed to authenticate token' });
+    try {
+        const game = await Game.findOne({ token: token });
+        if (!game) {
+            return res.status(401).json({ message: 'Token does not match any game' });
         }
-        req.username = decoded.username;
         next();
-    });
+    } catch (err) {
+        return res.status(500).json({ message: err.message });
+    }
 };
 
 // Creating one statement
