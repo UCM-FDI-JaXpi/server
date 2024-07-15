@@ -7,7 +7,8 @@ router.delete('/', (req, res, next) => {
         if (err) {
             return next(err);
         }
-        res.redirect('/login');
+        else 
+            return res.status(200).json({ message: 'Logout successful' });
     });
 });
 
