@@ -17,7 +17,8 @@ bcrypt.hash(plainPassword, saltRounds, (err, hash) => {
 		{ name: 'Student3', email: 'student3@example.com', password: hash, usr_type: 'student' },
 		{ name: 'Teacher1', email: 'teacher1@example.com', password: hash, usr_type: 'teacher' },
 		{ name: 'Teacher2', email: 'teacher2@example.com', password: hash, usr_type: 'teacher' },
-		{ name: 'Dev', email: 'dev@example.com', password: hash, usr_type: 'dev' }
+		{ name: 'Dev1', email: 'dev@example.com', password: hash, usr_type: 'dev' },
+		{ name: 'Dev2', email: 'dev@example.com', password: hash, usr_type: 'dev' }
 	];
 
 	// Connect to database
