@@ -87,9 +87,9 @@ function generateRandomId() {
 }
 
 // Function to generate a random token
-function generateRandomToken(gameName) {
-	const characters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-	let token = gameName.replace(/\s/g, '') + '-';
+function generateRandomToken() {
+	const characters = 'abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNOPQRSTUVWXYZ023456789';
+    token = "";
 	for (let i = 0; i < 5; i++) {
 		for (let j = 0; j < 5; j++) {
 			token += characters.charAt(Math.floor(Math.random() * characters.length));
