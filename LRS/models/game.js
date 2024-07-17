@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const gameSchema = new mongoose.Schema({
 	id: {
 		type: String,
+        default: () => Math.random().toString(36).substring(2, 10),
 		required: true,
 		unique: true,
 	},
