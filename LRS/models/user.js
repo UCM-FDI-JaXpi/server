@@ -9,13 +9,11 @@ const userSchema = new mongoose.Schema({
 	},
 	email: {
 		type: String,
-		required: true,
 		unique: true,
 		validate: [isEmail, 'Invalid email']
 	},
 	password: {
 		type: String,
-		required: true,
 		minlength: 8
 	},
 	registerDate: {
@@ -26,6 +24,13 @@ const userSchema = new mongoose.Schema({
 	usr_type: {
 		type: String,
 		required: true
+	},
+	institution: {
+		type: String,
+	},
+	session_keys: {
+		type: [String],
+		default: []
 	}
 })
 
