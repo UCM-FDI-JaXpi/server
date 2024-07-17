@@ -228,8 +228,8 @@ app.use('/logout', logoutRouter);
 const registerRouter = require('./routes/register');
 app.use('/admin/register', checkAdmin, registerRouter);
 
-const studentsRouter = require('./routes/students');
-app.use('/students', checkTeacher, studentsRouter);
+const teacherRouter = require('./routes/teacher');
+app.use('/teacher', checkTeacher, teacherRouter);
 
 const developersRouter = require('./routes/dev');
 app.use('/dev', checkDev, developersRouter);
