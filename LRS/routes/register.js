@@ -39,6 +39,16 @@ router.post('/', checkNotAuthenticated, async (req, res) => {
 		return res.status(400).json({ message: 'Invalid user type' });
 	}
 
+    // Verify students cannot register themselves
+    if (usr_type === 'student') {
+        return res.status(400).json({ message: 'Students cannot register themselves' });
+    }
+
+    // Verify institution is required for teachers
+    if (usr_type === 'teacher' && !institution) {
+        return res.status(400).json({ message: 'Institution is required for teachers' });
+    }
+
     try {
         // Verify if the user name already exists
         const existingUser = await User.findOne({ name });

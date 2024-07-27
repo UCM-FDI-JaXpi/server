@@ -25,13 +25,15 @@ const userSchema = new mongoose.Schema({
 		type: String,
 		required: true
 	},
-	institution: {
-		type: String,
-	},
-	session_keys: {
-		type: [String],
-		default: []
-	}
+    institution: {
+        type: String,
+        required: function() { return this.usr_type === 'teacher'; }
+    },
+    session_keys: {
+        type: [String],
+        default: [],
+        required: function() { return this.usr_type === 'student'; }
+    }
 })
 
 module.exports = mongoose.mongoose.model('User', userSchema);
