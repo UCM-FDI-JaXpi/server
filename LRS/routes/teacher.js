@@ -49,12 +49,9 @@ router.post('/create-group-with-students', async (req, res) => {
 
 router.post('/create-game-session', async (req, res) => {
     const { groupId, gameId } = req.body;
-    const csvPath = await createGameSession(groupId, gameId);
-    res.download(csvPath, err => {
-        if (err) {
-            res.status(500).send({ message: "Could not download the file. " + err });
-        }
-    });
+    const sessionKeys = await createGameSession(groupId, gameId);
+
+	res.status(201).json(sessionKeys);
 });
 
 // Function to generate a random key
@@ -106,17 +103,7 @@ async function createGameSession(groupId, gameId) {
     });
     await newGameSession.save();
 
-    const csvWriter = createCsvWriter({
-        path: 'sessionKeys.csv',
-        header: [
-            { id: 'student', title: 'STUDENT' },
-            { id: 'sessionKey', title: 'SESSION KEY' },
-        ]
-    });
-
-    await csvWriter.writeRecords(sessionKeys);
-    console.log('The CSV file was written successfully');
-    return 'sessionKeys.csv';
+    return sessionKeys;
 }
 
 module.exports = router;
