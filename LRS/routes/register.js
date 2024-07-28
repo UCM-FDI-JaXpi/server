@@ -27,7 +27,7 @@ function validatePassword(password) {
 
 // Creating one user
 router.post('/', checkNotAuthenticated, async (req, res) => {
-    const { name, email, pwd, rep_pwd, usr_type } = req.body;
+    const { name, email, pwd, rep_pwd, usr_type, institution } = req.body;
 
     // Verify passwords match
     if (pwd !== rep_pwd) {
@@ -67,7 +67,8 @@ router.post('/', checkNotAuthenticated, async (req, res) => {
         // Create user
 		const salt = Number(process.env.BCRYPT_SALT);
 		const password = await bcrypt.hash(pwd, salt); 	
-        const newUser = new User({ name, email, password, usr_type });
+        const newUser = new User({ name, email, password, usr_type, 
+			institution: usr_type === 'teacher' ? institution : undefined });
         await newUser.save();
 
 		res.redirect('/login');
