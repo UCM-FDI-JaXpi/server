@@ -35,7 +35,11 @@ const recordSchema = new mongoose.Schema({
 			parent: { id: { type: String } },
 			grouping: { id: { type: String } }
 		},
-		extensions: { type: Object }
+		extensions: { 
+			type: Object,
+			game: { type: String },
+			session: { type: String }
+		}
 	},
 	timestamp: { type: Date, required: true },
 	stored: { 

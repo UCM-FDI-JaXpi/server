@@ -4,10 +4,26 @@ if (process.env.NODE_ENV !== 'production') {
 
 const express = require('express');
 const router = express.Router();
+const bcrypt = require('bcrypt');
 const Record = require('../models/record');
 const Game = require('../models/game');
+const GameSession = require('../models/gamesession');
+const Group = require('../models/group');
 const { checkAuthenticated, getUserType } = require('../index');
 const { io } = require('../index');
+
+// Helper function to unhash session
+async function unhashSession(sessionHash) {
+    const salt = process.env.SESSION_SALT;
+    const sessionIds = await Record.distinct('context.extensions.session');
+    for (const sessionId of sessionIds) {
+        const hashedSessionId = await bcrypt.hash(sessionId, salt);
+        if (hashedSessionId === sessionHash) {
+            return sessionId;
+        }
+    }
+    return null;
+}
 
 // Getting all statements
 router.get('/', checkAuthenticated, async (req, res) => {
@@ -22,6 +38,17 @@ router.get('/', checkAuthenticated, async (req, res) => {
 					{ 'actor.mbox': mbox }
 				]
 			});
+
+			for (const statement of statements) {
+                if (statement.context && statement.context.extensions && statement.context.extensions.session) {
+                    const sessionHash = statement.context.extensions.session;
+                    const sessionId = await unhashSession(sessionHash);
+                    if (sessionId) {
+                        statement.context.extensions.session = sessionId;
+                    }
+                }
+            }
+
 			io.emit('studentData', statements);
 			res.json(statements);
 		} catch (err) {
@@ -73,6 +100,16 @@ router.get('/', checkAuthenticated, async (req, res) => {
 					}
 				}
 			]);
+
+			for (const statement of statements) {
+                if (statement.context && statement.context.extensions && statement.context.extensions.session) {
+                    const sessionHash = statement.context.extensions.session;
+                    const sessionId = await unhashSession(sessionHash);
+                    if (sessionId) {
+                        statement.context.extensions.session = sessionId;
+                    }
+                }
+            }
 
 			io.emit('teacherData', statements);
 			res.json(statements);
@@ -204,41 +241,51 @@ const verifyToken = async (req, res, next) => {
 
 // Creating one statement
 router.post('/', verifyToken, async (req, res) => {
-	const statement = req.body;
-	const record = new Record(statement);
+    const statement = req.body;
 
-	try {
-		const newRecord = await record.save();
-		console.log("Traza recibida");
+    if (statement.context && statement.context.extensions && statement.context.extensions.session) {
+        try {
+            const sessionId = statement.context.extensions.session;
+            const session = await GameSession.findOne({ sessionId }).populate('groupId');
+            if (!session) {
+                return res.status(404).json({ message: 'Session not found' });
+            }
 
-		console.log("Entering post");
+            const group = await Group.findById(session.groupId);
+            if (!group) {
+                return res.status(404).json({ message: 'Group not found' });
+            }
 
-		// Send the new statement to the socket client with the same username as the actor
-		const actorName = newRecord.actor.name;
-		console.log("Trying to send data to: " + actorName);
+            // Override context
+            statement.context.instructor = { name: group.teacher };
+            statement.context.contextActivities.parent = { id: group._id.toString() };
+            statement.context.contextActivities.grouping = { id: group.institution };
 
-		// Find the socket with the same username as the actor
-		let connectedSocket;
-		io.sockets.sockets.forEach(socket => {
-			if (socket.username === actorName) {
-				connectedSocket = socket;
-				return false;
-			}
-		});
+            // Hash sessionId
+            const salt = process.env.SESSION_SALT;
+            const hashedSessionId = await bcrypt.hash(sessionId, salt);
+            statement.context.extensions.session = hashedSessionId;
 
-		if (connectedSocket) {
-			connectedSocket.emit('newData', newRecord);
-			console.log("Data sent to socket with username: " + actorName);
-		} else {
-			console.log("No socket found with username: " + actorName);
-		}
+            // Store statement
+            const newRecord = new Record(statement);
+            await newRecord.save();
 
+            io.emit('newStatement', newRecord);
+            res.status(201).json(newRecord);
+        } catch (err) {
+            res.status(500).json({ message: err.message });
+        }
+    } else {
+        try {
+            const newRecord = new Record(statement);
+            await newRecord.save();
 
-		res.status(201).json(newRecord); // 201 means succesfully created an object
-	} catch (err) {
-		console.log("Error: " + err.message);
-		res.status(400).json({ message: err.message });
-	}
+            io.emit('newStatement', newRecord);
+            res.status(201).json(newRecord);
+        } catch (err) {
+            res.status(500).json({ message: err.message });
+        }
+    }
 });
 
 module.exports = router;
