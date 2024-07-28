@@ -7,6 +7,9 @@ const sessionSchema = new mongoose.Schema({
         required: true,
         unique: true,
     },
+	sessionName: {
+		type: String,
+	},
     gameId: {
         type: String ,
         ref: 'Game',
