@@ -73,10 +73,12 @@ function generateRandomStudent(name) {
 }
 
 // Function to generate a number of students
-function generateStudentsFromScratch(num) {
+async function generateStudentsFromScratch(num) {
     const students = [];
     for (let i = 0; i < num; i++) {
-        students.push(generateRandomStudent("student" + i));
+        const studentName = generateRandomStudent("student" + i);
+        students.push(studentName);
+        await User.create({ name: studentName, usr_type: 'student' });
     }
     return students;
 }
@@ -85,8 +87,11 @@ function generateStudentsFromScratch(num) {
 async function generateStudentFromStudentList(studentList) {
     const students = [];
     for (let i = 0; i < studentList.length; i++) {
-        students.push(generateRandomStudent(studentList[i]));
+        const studentName = generateRandomStudent(studentList[i]);
+        students.push(studentName);
+        await User.create({ name: studentName, usr_type: 'student' });
     }
+    return students;
 }
 async function createGameSession(groupId, gameId) {
     const group = await Group.findById(groupId).populate('students');
