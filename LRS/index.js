@@ -234,6 +234,9 @@ app.use('/teacher', checkTeacher, teacherRouter);
 const developersRouter = require('./routes/dev');
 app.use('/dev', checkDev, developersRouter);
 
+const gamesRouter = require('./routes/games');
+app.use('/games', checkAuthenticated, gamesRouter);
+
 server.listen(port, () => {
 	console.log(`The application is listening at http://localhost:${port}`);
 });
