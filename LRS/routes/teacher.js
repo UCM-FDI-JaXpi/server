@@ -29,11 +29,11 @@ router.post('/create-group-from-scratch', async (req, res) => {
 router.post('/create-group-with-students', async (req, res) => {
     const name = req.body.name;
     const students = req.body.students;
-    const teacher = user.name;
-    const institution = user.institution;
+    const teacher = req.user.name;
+    const institution = req.user.institution;
 
     try {
-        const generatedStudents = generateStudentFromStudentList(students);
+        const generatedStudents = await generateStudentFromStudentList(students);
         const newGroup = new Group({
             name,
             teacher,
