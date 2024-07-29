@@ -9,12 +9,13 @@ const userSchema = new mongoose.Schema({
 	},
 	email: {
 		type: String,
-		unique: true,
-		validate: [isEmail, 'Invalid email']
+		validate: [isEmail, 'Invalid email'],
+        sparse: true,
 	},
 	password: {
 		type: String,
-		minlength: 8
+		minlength: 8,
+		sparse: true,
 	},
 	registerDate: {
 		type: Date,
