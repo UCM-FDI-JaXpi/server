@@ -4,7 +4,18 @@ const router = express.Router();
 const User = require('../models/user');
 const Group = require('../models/group');
 const GameSession = require('../models/gamesession');
-const createCsvWriter = require('csv-writer').createObjectCsvWriter;
+
+router.get('/get-groups', async (req, res) => {
+	const teacher = req.user.name;
+	const institution = req.user.institution;
+
+	try {
+		const groups = await Group.find({ teacher, institution });
+		res.status(200).json(groups);
+	} catch (error) {
+		res.status(500).json({ message: error.message });
+	}
+});
 
 router.post('/create-group-from-scratch', async (req, res) => {
     const { name, nStudents } = req.body;
