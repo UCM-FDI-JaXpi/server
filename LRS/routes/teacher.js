@@ -109,7 +109,7 @@ async function generateStudentFromStudentList(studentList) {
     return students;
 }
 async function createGameSession(groupId, gameId, gameSessionName) {
-    const group = await Group.findById(groupId);ç
+	const group = await Group.findOne({ id: groupId });
 	if (!group) {
 		throw new Error('Group not found');
 	}
