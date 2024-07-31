@@ -59,10 +59,14 @@ router.post('/create-group-with-students', async (req, res) => {
 });
 
 router.post('/create-game-session', async (req, res) => {
-    const { groupId, gameId } = req.body;
-    const sessionKeys = await createGameSession(groupId, gameId);
+	try {
+		const { groupId, gameId, gameSessionName } = req.body;
+		const sessionKeys = await createGameSession(groupId, gameId, gameSessionName);
 
-	res.status(201).json(sessionKeys);
+		res.status(201).json(sessionKeys);
+	} catch (error) {
+		res.status(500).json({ message: error.message });
+	}
 });
 
 // Function to generate a random key
@@ -70,9 +74,9 @@ function generateRandomKey() {
     const characters = 'ABCDEFGHJKLMNOPQRSTUVWXYZ023456789';
     key = "";
 	for (let i = 0; i < 6; i++) {
-		token += characters.charAt(Math.floor(Math.random() * characters.length));
+		key += characters.charAt(Math.floor(Math.random() * characters.length));
 	}
-	return token;
+	return key;
 }
 
 // Function to generate random username and password
@@ -104,20 +108,36 @@ async function generateStudentFromStudentList(studentList) {
     }
     return students;
 }
-async function createGameSession(groupId, gameId) {
-    const group = await Group.findById(groupId).populate('students');
-    const sessionKeys = group.students.map(student => {
-        const sessionKey = generateRandomKey();
-        User.findByIdAndUpdate(student._id, { $push: { session_keys: sessionKey } }).exec();
-        return { student: student.name, sessionKey };
-    });
+async function createGameSession(groupId, gameId, gameSessionName) {
+    const group = await Group.findById(groupId);ç
+	if (!group) {
+		throw new Error('Group not found');
+	}
 
-    const newGameSession = new GameSession({
-        group: groupId,
-        game: gameId,
-        sessionKeys: sessionKeys.map(pair => pair.sessionKey)
-    });
-    await newGameSession.save();
+	const students = group.students;
+	if (students.length === 0) {
+		throw new Error('Group has no students');
+	}
+
+    const sessionKeys = await Promise.all(students.map(async student => {
+        const key = generateRandomKey();
+        const user = await User.findOne({ name: student });
+        if (user) {
+            user.session_keys.push(key);
+            await user.save();
+        }
+        return {
+            name: student,
+            key: key
+        };
+    }));
+
+	await GameSession.create({
+		groupId,
+		gameId,
+		sessionName: gameSessionName,
+		students: sessionKeys
+	});
 
     return sessionKeys;
 }
