@@ -182,6 +182,11 @@ function getUserType(req) {
     }
 }
 
+// Use to send user data to the frontend
+app.get('/api/session', cors(corsOptionsApi), (req, res) => {
+    res.json({ user: req.user });
+});
+
 module.exports.checkAuthenticated = checkAuthenticated;
 module.exports.checkNotAuthenticated = checkNotAuthenticated;
 module.exports.checkAdmin = checkAdmin;
@@ -206,10 +211,11 @@ app.use(express.json());
 const recordsRouter = require('./routes/records');
 app.use('/records', cors(corsOptionsApi), recordsRouter);
 
-// Router for other api public petitions
+// Router for api petitions
 const apiRouter = require('./routes/api');
-app.use('/api', cors(corsOptionsApi), apiRouter);
+app.use('/publicAPI', cors(corsOptionsApi), apiRouter);
 
+// CORS config for the rest of the routes
 app.use(cors(corsOptionsRest));
 
 // Router for user petitions

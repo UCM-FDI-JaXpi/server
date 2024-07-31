@@ -16,9 +16,4 @@ router.get('/:key', async (req, res) => {
 	}
 });
 
-// Use to send user data to the frontend
-router.get('/session', checkAuthenticated, (req, res) => {
-    res.json({ user: req.user });
-});
-
 module.exports = router;
