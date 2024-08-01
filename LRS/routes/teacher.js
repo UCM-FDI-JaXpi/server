@@ -61,9 +61,9 @@ router.post('/create-group-with-students', async (req, res) => {
 router.post('/create-game-session', async (req, res) => {
 	try {
 		const { groupId, gameId, gameSessionName } = req.body;
-		const sessionKeys = await createGameSession(groupId, gameId, gameSessionName);
+		const newSession = await createGameSession(groupId, gameId, gameSessionName);
 
-		res.status(201).json(sessionKeys);
+		res.status(201).json(newSession);
 	} catch (error) {
 		res.status(500).json({ message: error.message });
 	}
@@ -117,7 +117,6 @@ async function generateStudentFromStudentList(studentList) {
 	return students;
 }
 async function createGameSession(groupId, gameId, gameSessionName) {
-	try {
 		const group = await Group.findOne({ id: groupId });
 		if (!group) {
 			throw new Error('Group not found');
@@ -147,11 +146,8 @@ async function createGameSession(groupId, gameId, gameSessionName) {
 			sessionName: gameSessionName,
 			students: sessionKeys
 		});
-		res.status(201).json(newGameSession);
-		
-	} catch (error) {
-		res.status(500).json({ message: error.message });
-	}
+
+		return newGameSession;
 }
 
 module.exports = router;
