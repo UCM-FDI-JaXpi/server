@@ -93,7 +93,11 @@ async function generateStudentsFromScratch(num) {
     for (let i = 0; i < num; i++) {
         const studentName = generateRandomStudent("student" + i);
         students.push(studentName);
-        await User.create({ name: studentName, usr_type: 'student' });
+		const newStudent = new User({
+			name: studentName,
+			usr_type: 'student'
+		});
+		await newStudent.save();
     }
     return students;
 }
@@ -104,7 +108,11 @@ async function generateStudentFromStudentList(studentList) {
     for (let i = 0; i < studentList.length; i++) {
         const studentName = generateRandomStudent(studentList[i]);
         students.push(studentName);
-        await User.create({ name: studentName, usr_type: 'student' });
+		const newStudent = new User({
+			name: studentName,
+			usr_type: 'student'
+		});
+		await newStudent.save();
     }
     return students;
 }
