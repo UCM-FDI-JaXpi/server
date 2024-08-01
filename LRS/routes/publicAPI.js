@@ -3,9 +3,9 @@ const GameSession = require('../models/gamesession');
 const { checkAuthenticated } = require('..');
 const router = express.Router();
 
-router.get('/key', async (req, res) => {
+router.get('/key/:key', async (req, res) => {
 	try {
-		const session = await GameSession.findOne({ 'students.key': req.body.key });
+		const session = await GameSession.findOne({ 'students.key': req.params.key });
 		if (session) {
 			res.status(200).json({ exists: true });
 		} else {
