@@ -15,8 +15,8 @@ bcrypt.hash(plainPassword, saltRounds, (err, hash) => {
 		{ name: 'Student1', email: 'student1@example.com', password: hash, usr_type: 'student' },
 		{ name: 'Student2', email: 'student2@example.com', password: hash, usr_type: 'student' },
 		{ name: 'Student3', email: 'student3@example.com', password: hash, usr_type: 'student' },
-		{ name: 'Teacher1', email: 'teacher1@example.com', password: hash, usr_type: 'teacher' },
-		{ name: 'Teacher2', email: 'teacher2@example.com', password: hash, usr_type: 'teacher' },
+		{ name: 'Teacher1', email: 'teacher1@example.com', password: hash, usr_type: 'teacher', institution: 'UCM' },
+		{ name: 'Teacher2', email: 'teacher2@example.com', password: hash, usr_type: 'teacher', institution: 'UCM' },
 		{ name: 'Dev1', email: 'dev1@example.com', password: hash, usr_type: 'dev' },
 		{ name: 'Dev2', email: 'dev2@example.com', password: hash, usr_type: 'dev' }
 	];
