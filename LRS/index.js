@@ -212,7 +212,7 @@ const recordsRouter = require('./routes/records');
 app.use('/records', cors(corsOptionsApi), recordsRouter);
 
 // Router for api petitions
-const apiRouter = require('./routes/api');
+const apiRouter = require('./routes/publicAPI');
 app.use('/publicAPI', cors(corsOptionsApi), apiRouter);
 
 // CORS config for the rest of the routes
