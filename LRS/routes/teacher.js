@@ -6,12 +6,33 @@ const Group = require('../models/group');
 const GameSession = require('../models/gamesession');
 
 router.get('/get-groups', async (req, res) => {
-	const teacher = req.user.name;
-	const institution = req.user.institution;
+	try {
+		const groups = await getGroups();
+		res.status(200).json(groups);
+	} catch (error) {
+		res.status(500).json({ message: error.message });
+	}
+});
+
+router.get('/get-game-sessions', async (req, res) => {
+	try {
+		const groups = await getGroups();
+		if (groups.length === 0) {
+			throw new Error('No groups found');
+		}
+		const gamesessions = await GameSession.find({ groupId: { $in: groups.map(group => group.id) } });
+		res.status(200).json(gamesessions);
+	} catch (error) {
+		res.status(500).json({ message: error.message });
+	}
+});
+
+router.get('/get-game-sessions/:groupId', async (req, res) => {
+	const groupId = req.params.groupId;
 
 	try {
-		const groups = await Group.find({ teacher, institution });
-		res.status(200).json(groups);
+		const gamesessions = await GameSession.find({ groupId });
+		res.status(200).json(gamesessions);
 	} catch (error) {
 		res.status(500).json({ message: error.message });
 	}
@@ -148,6 +169,18 @@ async function createGameSession(groupId, gameId, gameSessionName) {
 		});
 
 		return newGameSession;
+}
+
+async function getGroups() {
+	const teacher = req.user.name;
+	const institution = req.user.institution;
+
+	try {
+		const groups = await Group.find({ teacher, institution });
+		return groups;
+	} catch (error) {
+		throw new Error(error.message);
+	}
 }
 
 module.exports = router;
