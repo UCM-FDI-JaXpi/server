@@ -18,9 +18,11 @@ const User = require('./models/user');
 const app = express();
 const port = process.env.PORT || 3000;
 const frontPort = process.env.FRONT_PORT || 8080;
+const gamePort = process.env.GAME_PORT || 8081;
 
 console.log('Backend port:', port);
 console.log('Frontend port:', frontPort);
+console.log('Game port:', gamePort);
 
 app.use(express.urlencoded({ extended: false }));
 app.use(flash());
@@ -29,14 +31,14 @@ app.use(flash());
 // Configuración CORS permisiva para /records y /api/session
 // Se realiza a traves de middleware ya que es necesario para permitir todos los orígenes
 const corsOptionsApi = {
-    origin: [`http://localhost:${port}`, `http://localhost:${frontPort}`],
+    origin: [`http://localhost:${port}`, `http://localhost:${frontPort}`, `http://localhost:${gamePort}`],
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     credentials: true,
 };
 
 // Configuración CORS para el resto de rutas
 const corsOptionsRest = {
-    origin: [`http://localhost:${port}`, `http://localhost:${frontPort}`],
+    origin: [`http://localhost:${port}`, `http://localhost:${frontPort}`, `http://localhost:${gamePort}`],
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     credentials: true,
 };
@@ -46,7 +48,7 @@ const corsOptionsRest = {
 const server = http.createServer(app);
 const io = socketIo(server, {
 	cors: {
-		origin: [`http://localhost:${port}`, `http://localhost:${frontPort}`],
+		origin: [`http://localhost:${port}`, `http://localhost:${frontPort}`, `http://localhost:${gamePort}`],
 		methods: ['GET', 'POST', 'PUT', 'DELETE'],
 		credentials: true,
 	}
