@@ -232,7 +232,7 @@ app.use('/logout', logoutRouter);
 
 // Router for register
 const registerRouter = require('./routes/register');
-app.use('/admin/register', checkAdmin, registerRouter);
+app.use('/register', checkNotAuthenticated, registerRouter);
 
 const teacherRouter = require('./routes/teacher');
 app.use('/teacher', checkTeacher, teacherRouter);

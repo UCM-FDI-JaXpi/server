@@ -26,7 +26,7 @@ function validatePassword(password) {
 }
 
 // Creating one user
-router.post('/', checkNotAuthenticated, async (req, res) => {
+router.post('/', async (req, res) => {
     const { name, email, pwd, rep_pwd, usr_type, institution } = req.body;
 
     // Verify passwords match
