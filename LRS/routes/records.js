@@ -242,6 +242,7 @@ const verifyToken = async (req, res, next) => {
 // Creating one statement
 router.post('/', verifyToken, async (req, res) => {
     const statement = req.body;
+	const token = req.headers['x-authentication'];
 
     if (statement.context && statement.context.extensions && statement.context.extensions.session) {
         try {
@@ -250,6 +251,13 @@ router.post('/', verifyToken, async (req, res) => {
             if (!session) {
                 return res.status(404).json({ message: 'Session not found' });
             }
+			const game = await Game.findOne({ id: session.gameId });
+			if (!game) {
+				return res.status(404).json({ message: 'Game not found' });
+			}
+			if (game.token !== token) {
+				return res.status(403).json({ message: 'Forbidden: Token does not match game' });
+			}
             const group = await Group.findOne({ id: session.groupId });
             if (!group) {
                 return res.status(404).json({ message: 'Group not found' });
