@@ -245,20 +245,20 @@ router.post('/', verifyToken, async (req, res) => {
 
     if (statement.context && statement.context.extensions && statement.context.extensions.session) {
         try {
-            const sessionId = statement.context.extensions.session;
-            const session = await GameSession.findOne({ sessionId }).populate('groupId');
+            const sessionKey = statement.context.extensions.session;
+			const session = await GameSession.findOne({ 'students.key': sessionKey });
             if (!session) {
                 return res.status(404).json({ message: 'Session not found' });
             }
 
-            const group = await Group.findById(session.groupId);
+            const group = await Group.findOne({ id: session.groupId });
             if (!group) {
                 return res.status(404).json({ message: 'Group not found' });
             }
 
             // Override context
             statement.context.instructor = { name: group.teacher };
-            statement.context.contextActivities.parent = { id: group._id.toString() };
+            statement.context.contextActivities.parent = { id: group.id.toString() };
             statement.context.contextActivities.grouping = { id: group.institution };
 
             // Hash sessionId
