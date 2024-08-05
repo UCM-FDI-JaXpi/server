@@ -15,11 +15,11 @@ const { io } = require('../index');
 // Helper function to unhash session
 async function unhashSession(sessionHash) {
     const salt = process.env.SESSION_SALT;
-    const sessionIds = await Record.distinct('context.extensions.session');
-    for (const sessionId of sessionIds) {
-        const hashedSessionId = await bcrypt.hash(sessionId, salt);
-        if (hashedSessionId === sessionHash) {
-            return sessionId;
+    const sessionKeys = await Record.distinct('context.extensions.session');
+    for (const sessionKey of sessionKeys) {
+        const hashedSessionKey = await bcrypt.hash(sessionKey, salt);
+        if (hashedSessionKey === sessionHash) {
+            return sessionKey;
         }
     }
     return null;
@@ -42,9 +42,9 @@ router.get('/', checkAuthenticated, async (req, res) => {
 			for (const statement of statements) {
                 if (statement.context && statement.context.extensions && statement.context.extensions.session) {
                     const sessionHash = statement.context.extensions.session;
-                    const sessionId = await unhashSession(sessionHash);
-                    if (sessionId) {
-                        statement.context.extensions.session = sessionId;
+                    const sessionKey = await unhashSession(sessionHash);
+                    if (sessionKey) {
+                        statement.context.extensions.session = sessionKey;
                     }
                 }
             }
@@ -104,9 +104,9 @@ router.get('/', checkAuthenticated, async (req, res) => {
 			for (const statement of statements) {
                 if (statement.context && statement.context.extensions && statement.context.extensions.session) {
                     const sessionHash = statement.context.extensions.session;
-                    const sessionId = await unhashSession(sessionHash);
-                    if (sessionId) {
-                        statement.context.extensions.session = sessionId;
+                    const sessionKey = await unhashSession(sessionHash);
+                    if (sessionKey) {
+                        statement.context.extensions.session = sessionKey;
                     }
                 }
             }
@@ -250,7 +250,6 @@ router.post('/', verifyToken, async (req, res) => {
             if (!session) {
                 return res.status(404).json({ message: 'Session not found' });
             }
-			const sessionId = session.id;
             const group = await Group.findOne({ id: session.groupId });
             if (!group) {
                 return res.status(404).json({ message: 'Group not found' });
@@ -261,10 +260,10 @@ router.post('/', verifyToken, async (req, res) => {
             statement.context.contextActivities.parent = { id: group.id.toString() };
             statement.context.contextActivities.grouping = { id: group.institution };
 
-            // Hash sessionId
+            // Hash sessionKey
             const salt = process.env.SESSION_SALT;
-            const hashedSessionId = await bcrypt.hash(sessionId, salt);
-            statement.context.extensions.session = hashedSessionId;
+            const hashedSessionKey = await bcrypt.hash(sessionKey, salt);
+            statement.context.extensions.session = hashedSessionKey;
 
             // Store statement
             const newRecord = new Record(statement);
