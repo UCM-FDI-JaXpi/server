@@ -58,8 +58,8 @@ router.patch('/games/:id', getGame, async (req, res) => {
 // Delete a game
 router.delete('/games/:id', getGame, async (req, res) => {
 	try {
-		await res.game.remove();
-		res.json({ message: 'Deleted Game' });
+		await res.game.deleteOne();
+		res.status(200).json({ message: 'Deleted Game' });
 	} catch (err) {
 		res.status(500).json({ message: err.message });
 	}
@@ -69,7 +69,7 @@ router.delete('/games/:id', getGame, async (req, res) => {
 async function getGame(req, res, next) {
 	let game;
 	try {
-		game = await Game.findById(req.params.id);
+		game = await Game.findOne({ id: req.params.id});
 		if (game == null) {
 			return res.status(404).json({ message: 'Cannot find game' });
 		}
