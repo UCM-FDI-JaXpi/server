@@ -1,3 +1,7 @@
+if (process.env.NODE_ENV !== 'production') {
+	require('dotenv').config();
+}
+
 const express = require('express');
 const bcrypt = require('bcrypt');
 const router = express.Router();
@@ -71,10 +75,10 @@ router.post('/', async (req, res) => {
 			institution: usr_type === 'teacher' ? institution : undefined });
         await newUser.save();
 
-		res.redirect('/login');
+		res.redirect(process.env.SERVER_URL + ':' + process.env.FRONTPORT + '/login');
 
     } catch (error) {
-		res.redirect('/register');
+		res.redirect(process.env.SERVER_URL + ':' + process.env.FRONTPORT + '/register');
     }
 });
 
