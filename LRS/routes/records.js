@@ -250,8 +250,7 @@ router.post('/', verifyToken, async (req, res) => {
             if (!session) {
                 return res.status(404).json({ message: 'Session not found' });
             }
-
-            const group = await Group.findOne({ id: session.groupId });
+            const group = await Group.findOne({ 'id': session.groupId });
             if (!group) {
                 return res.status(404).json({ message: 'Group not found' });
             }
