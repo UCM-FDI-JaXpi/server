@@ -261,7 +261,7 @@ router.post('/', verifyToken, async (req, res) => {
             statement.context.contextActivities.grouping = { id: group.institution };
 
             // Hash sessionKey
-            const salt = process.env.SESSION_SALT;
+            const salt = Number(process.env.SESSION_SALT);
             const hashedSessionKey = await bcrypt.hash(sessionKey, salt);
             statement.context.extensions.session = hashedSessionKey;
 
