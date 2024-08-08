@@ -4,20 +4,21 @@ if (process.env.NODE_ENV !== 'production') {
 
 const express = require('express');
 const router = express.Router();
-const bcrypt = require('bcrypt');
+const crypto = require('crypto');
 const Record = require('../models/record');
 const Game = require('../models/game');
 const GameSession = require('../models/gamesession');
+const User = require('../models/user');
 const Group = require('../models/group');
 const { checkAuthenticated, getUserType } = require('../index');
 const { io } = require('../index');
 
 // Helper function to unhash session
 async function unhashSession(sessionHash) {
-    const salt = process.env.SESSION_SALT;
-    const sessionKeys = await Record.distinct('context.extensions.session');
+    const salt = Number(process.env.SESSION_SALT);
+    const sessionKeys = await GameSession.distinct('students.key');
     for (const sessionKey of sessionKeys) {
-        const hashedSessionKey = await bcrypt.hash(sessionKey, salt);
+        const hashedSessionKey = crypto.createHash('sha256').update(sessionKey+salt+"que bella es la vida").digest('hex').substring(0, 6);
         if (hashedSessionKey === sessionHash) {
             return sessionKey;
         }
@@ -77,7 +78,7 @@ router.get('/', checkAuthenticated, async (req, res) => {
 					$group: {
 						_id: {
 							parent: '$context.contextActivities.parent.id',
-							studentName: '$actor.name'
+							session: '$context.extensions.session'
 						},
 						statements: { $push: '$$ROOT' }
 					}
@@ -87,7 +88,7 @@ router.get('/', checkAuthenticated, async (req, res) => {
 						_id: '$_id.parent',
 						actors: {
 							$push: {
-								studentName: '$_id.studentName',
+								session: '$_id.session',
 								statements: '$statements'
 							}
 						}
@@ -95,22 +96,32 @@ router.get('/', checkAuthenticated, async (req, res) => {
 				},
 				{
 					$project: {
-						_id: 1,
+						_id: 0, // Excluye el campo _id
+      					groupId: '$_id', // Renombra _id a groupId
 						actors: 1
 					}
 				}
 			]);
 
+			
 			for (const statement of statements) {
-                if (statement.context && statement.context.extensions && statement.context.extensions.session) {
-                    const sessionHash = statement.context.extensions.session;
-                    const sessionKey = await unhashSession(sessionHash);
-                    if (sessionKey) {
-                        statement.context.extensions.session = sessionKey;
-                    }
-                }
-            }
+				for (const actor of statement.actors) {
+					const sessionKeyActor = await unhashSession(actor.session);
+					actor.session = sessionKeyActor; // Save session without hash
+					const user = await User.findOne({ session_keys: actor.session, usr_type: 'student' });
+					actor.name = user.name; // Add and save name of user
 
+					for (const record of actor.statements) {
+						if (record.context && record.context.extensions && record.context.extensions.session) {
+							const sessionHash = record.context.extensions.session;
+							const sessionKey = await unhashSession(sessionHash);
+							if (sessionKey) {
+								record.context.extensions.session = sessionKey;
+							}
+						}
+					}
+				}
+            }
 			io.emit('teacherData', statements);
 			res.json(statements);
 		} catch (err) {
@@ -270,7 +281,7 @@ router.post('/', verifyToken, async (req, res) => {
 
             // Hash sessionKey
             const salt = Number(process.env.SESSION_SALT);
-            const hashedSessionKey = await bcrypt.hash(sessionKey, salt);
+            const hashedSessionKey = crypto.createHash('sha256').update(sessionKey+salt+"que bella es la vida").digest('hex').substring(0, 6);
             statement.context.extensions.session = hashedSessionKey;
 
             // Store statement
