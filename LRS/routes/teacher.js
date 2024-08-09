@@ -17,6 +17,20 @@ router.get('/get-groups', async (req, res) => {
 	}
 });
 
+router.get('/get-group/:id', async (req, res) => {
+	const groupId = req.params.id;
+
+	try {
+		const group = await Group.findOne({ id: groupId });
+		if (!group) {
+			throw new Error('Group not found');
+		}
+		res.status(200).json(group);
+	} catch (error) {
+		res.status(500).json({ message: error.message });
+	}
+});
+
 router.get('/get-game-sessions', async (req, res) => {
 	const teacher = req.user.name;
 	const institution = req.user.institution;
@@ -117,7 +131,7 @@ function generateRandomStudent(name) {
 // Function to generate a number of students
 async function generateStudentsFromScratch(num) {
 	const students = [];
-	
+
 	if (num <= 0) {
 		throw new Error('Invalid number of students');
 	}
