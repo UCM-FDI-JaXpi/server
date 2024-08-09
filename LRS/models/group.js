@@ -21,6 +21,7 @@ const groupSchema = new mongoose.Schema({
     },
     students: {
         type: [String],
+		required: true,
     },
 });
 

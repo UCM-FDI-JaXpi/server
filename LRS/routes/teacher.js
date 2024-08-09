@@ -117,6 +117,11 @@ function generateRandomStudent(name) {
 // Function to generate a number of students
 async function generateStudentsFromScratch(num) {
 	const students = [];
+	
+	if (num <= 0) {
+		throw new Error('Invalid number of students');
+	}
+
 	for (let i = 0; i < num; i++) {
 		const studentName = generateRandomStudent("student" + i);
 		students.push(studentName);

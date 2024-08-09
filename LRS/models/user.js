@@ -32,7 +32,6 @@ const userSchema = new mongoose.Schema({
     },
     session_keys: {
         type: [String],
-        default: [],
         required: function() { return this.usr_type === 'student'; }
     }
 })

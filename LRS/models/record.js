@@ -37,7 +37,7 @@ const recordSchema = new mongoose.Schema({
 		},
 		extensions: { 
 			type: Object,
-			game: { type: String },
+			gameId: { type: String },
 			session: { type: String }
 		}
 	},

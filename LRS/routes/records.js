@@ -96,8 +96,8 @@ router.get('/', checkAuthenticated, async (req, res) => {
 				},
 				{
 					$project: {
-						_id: 0, // Excluye el campo _id
-      					groupId: '$_id', // Renombra _id a groupId
+						_id: 0,
+      					groupId: '$_id',
 						actors: 1
 					}
 				}
@@ -105,11 +105,13 @@ router.get('/', checkAuthenticated, async (req, res) => {
 
 			
 			for (const statement of statements) {
+				const group = await Group.findOne({ id: statement.groupId });
+				statement.groupName = group.name; 
 				for (const actor of statement.actors) {
 					const sessionKeyActor = await unhashSession(actor.session);
-					actor.session = sessionKeyActor; // Save session without hash
+					actor.session = sessionKeyActor; 
 					const user = await User.findOne({ session_keys: actor.session, usr_type: 'student' });
-					actor.name = user.name; // Add and save name of user
+					actor.name = user.name;
 
 					for (const record of actor.statements) {
 						if (record.context && record.context.extensions && record.context.extensions.session) {
@@ -276,8 +278,13 @@ router.post('/', verifyToken, async (req, res) => {
 
             // Override context
             statement.context.instructor = { name: group.teacher };
+			statement.context.extensions.gameId = game.id;
             statement.context.contextActivities.parent = { id: group.id.toString() };
             statement.context.contextActivities.grouping = { id: group.institution };
+
+			// Emit new statement
+			const newRecordUnhashed = new Record(statement);
+			io.emit('newStatement', newRecordUnhashed);
 
             // Hash sessionKey
             const salt = Number(process.env.SESSION_SALT);
@@ -287,9 +294,8 @@ router.post('/', verifyToken, async (req, res) => {
             // Store statement
             const newRecord = new Record(statement);
             await newRecord.save();
-
-            io.emit('newStatement', newRecord);
-            res.status(201).json(newRecord);
+            
+            res.status(201).json(newRecordUnhashed);
         } catch (err) {
             res.status(500).json({ message: err.message });
         }
