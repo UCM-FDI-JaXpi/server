@@ -236,6 +236,9 @@ app.use('/logout', logoutRouter);
 const registerRouter = require('./routes/register');
 app.use('/register', checkNotAuthenticated, registerRouter);
 
+const studentRouter = require('./routes/student');
+app.use('/student', checkAuthenticated, studentRouter);
+
 const teacherRouter = require('./routes/teacher');
 app.use('/teacher', checkTeacher, teacherRouter);
 
