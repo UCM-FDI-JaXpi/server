@@ -264,7 +264,7 @@ router.post('/', verifyToken, async (req, res) => {
             if (!session) {
                 return res.status(404).json({ message: 'Session not found' });
             }
-			const game = await Game.findOne({ id: session.gameId });
+			const game = await Game.findOne({ id: session["https://www.jaxpi.com/gameId"] });
 			if (!game) {
 				return res.status(404).json({ message: 'Game not found' });
 			}
@@ -278,7 +278,7 @@ router.post('/', verifyToken, async (req, res) => {
 
             // Override context
             statement.context.instructor = { name: group.teacher };
-			statement.context.extensions.gameId = game.id;
+			statement.context.extensions["https://www.jaxpi.com/gameId"] = game.id;
             statement.context.contextActivities.parent = { id: group.id.toString() };
             statement.context.contextActivities.grouping = { id: group.institution };
 

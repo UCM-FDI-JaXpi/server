@@ -37,8 +37,8 @@ const recordSchema = new mongoose.Schema({
 		},
 		extensions: { 
 			type: Object,
-			gameId: { type: String },
-			session: { type: String }
+			"https://www.jaxpi.com/gameId": { type: String },
+			"https://www.jaxpi.com/sessionKey": { type: String }
 		}
 	},
 	timestamp: { type: Date, required: true },
