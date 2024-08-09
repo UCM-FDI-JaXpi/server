@@ -53,6 +53,10 @@ router.post('/', async (req, res) => {
         return res.status(400).json({ message: 'Institution is required for teachers' });
     }
 
+	if (!name || !email || !pwd || !rep_pwd) {
+		return res.status(400).json({ message: 'All fields are required' });
+	}
+
     try {
         // Verify if the user name already exists
         const existingUser = await User.findOne({ name });
