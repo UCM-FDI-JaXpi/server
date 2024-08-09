@@ -41,11 +41,11 @@ router.get('/', checkAuthenticated, async (req, res) => {
 			});
 
 			for (const statement of statements) {
-                if (statement.context && statement.context.extensions && statement.context.extensions.session) {
-                    const sessionHash = statement.context.extensions.session;
+                if (statement.context && statement.context.extensions && statement.context.extensions["https://www.jaxpi.com/sessionKey"]) {
+                    const sessionHash = statement.context.extensions["https://www.jaxpi.com/sessionKey"];
                     const sessionKey = await unhashSession(sessionHash);
                     if (sessionKey) {
-                        statement.context.extensions.session = sessionKey;
+                        statement.context.extensions["https://www.jaxpi.com/sessionKey"] = sessionKey;
                     }
                 }
             }
@@ -78,7 +78,12 @@ router.get('/', checkAuthenticated, async (req, res) => {
 					$group: {
 						_id: {
 							parent: '$context.contextActivities.parent.id',
-							session: '$context.extensions.session'
+							session: {
+								$getField: {
+									field: "https://www.jaxpi.com/sessionKey",
+									input: "$context.extensions"
+								}
+							}
 						},
 						statements: { $push: '$$ROOT' }
 					}
@@ -102,23 +107,23 @@ router.get('/', checkAuthenticated, async (req, res) => {
 					}
 				}
 			]);
-
 			
 			for (const statement of statements) {
 				const group = await Group.findOne({ id: statement.groupId });
 				statement.groupName = group.name; 
 				for (const actor of statement.actors) {
+					console.log(actor.session)
 					const sessionKeyActor = await unhashSession(actor.session);
 					actor.session = sessionKeyActor; 
 					const user = await User.findOne({ session_keys: actor.session, usr_type: 'student' });
 					actor.name = user.name;
 
 					for (const record of actor.statements) {
-						if (record.context && record.context.extensions && record.context.extensions.session) {
-							const sessionHash = record.context.extensions.session;
+						if (record.context && record.context.extensions && record.context.extensions["https://www.jaxpi.com/sessionKey"]) {
+							const sessionHash = record.context.extensions["https://www.jaxpi.com/sessionKey"];
 							const sessionKey = await unhashSession(sessionHash);
 							if (sessionKey) {
-								record.context.extensions.session = sessionKey;
+								record.context.extensions["https://www.jaxpi.com/sessionKey"] = sessionKey;
 							}
 						}
 					}
@@ -257,14 +262,14 @@ router.post('/', verifyToken, async (req, res) => {
     const statement = req.body;
 	const token = req.headers['x-authentication'];
 
-    if (statement.context && statement.context.extensions && statement.context.extensions.session) {
+    if (statement.context && statement.context.extensions && statement.context.extensions["https://www.jaxpi.com/sessionKey"]) {
         try {
-            const sessionKey = statement.context.extensions.session;
+            const sessionKey = statement.context.extensions["https://www.jaxpi.com/sessionKey"];
 			const session = await GameSession.findOne({ 'students.key': sessionKey });
             if (!session) {
                 return res.status(404).json({ message: 'Session not found' });
             }
-			const game = await Game.findOne({ id: session["https://www.jaxpi.com/gameId"] });
+			const game = await Game.findOne({ id: session.gameId });
 			if (!game) {
 				return res.status(404).json({ message: 'Game not found' });
 			}
@@ -275,9 +280,13 @@ router.post('/', verifyToken, async (req, res) => {
             if (!group) {
                 return res.status(404).json({ message: 'Group not found' });
             }
+			const user = await User.findOne({ name: group.teacher });
+			if (!user) {
+				return res.status(404).json({ message: 'User not found' });
+			}
 
             // Override context
-            statement.context.instructor = { name: group.teacher };
+            statement.context.instructor = { name: user.name, mbox: user.email };
 			statement.context.extensions["https://www.jaxpi.com/gameId"] = game.id;
             statement.context.contextActivities.parent = { id: group.id.toString() };
             statement.context.contextActivities.grouping = { id: group.institution };
@@ -289,7 +298,7 @@ router.post('/', verifyToken, async (req, res) => {
             // Hash sessionKey
             const salt = Number(process.env.SESSION_SALT);
             const hashedSessionKey = crypto.createHash('sha256').update(sessionKey+salt+"que bella es la vida").digest('hex').substring(0, 6);
-            statement.context.extensions.session = hashedSessionKey;
+            statement.context.extensions["https://www.jaxpi.com/sessionKey"] = hashedSessionKey;
 
             // Store statement
             const newRecord = new Record(statement);
