@@ -78,7 +78,7 @@ router.get('/', checkAuthenticated, async (req, res) => {
 					$group: {
 						_id: {
 							parent: '$context.contextActivities.parent.id',
-							session: {
+							sessionKey: {
 								$getField: {
 									field: "https://www.jaxpi.com/sessionKey",
 									input: "$context.extensions"
@@ -93,7 +93,7 @@ router.get('/', checkAuthenticated, async (req, res) => {
 						_id: '$_id.parent',
 						actors: {
 							$push: {
-								session: '$_id.session',
+								sessionKey: '$_id.sessionKey',
 								statements: '$statements'
 							}
 						}
@@ -109,14 +109,24 @@ router.get('/', checkAuthenticated, async (req, res) => {
 			]);
 			
 			for (const statement of statements) {
-				const group = await Group.findOne({ id: statement.groupId });
-				statement.groupName = group.name; 
+				// Consulta con proyección para obtener solo el campo `name`
+				const group = await Group.findOne({ id: statement.groupId }, { name: 1, _id: 0 }); // `group` aquí será un objeto con solo el campo `name`
+				if (group){
+					statement.groupName = group.name;
+				} else {
+					return res.status(404).json({ message: 'Group not found' });
+				}
+
 				for (const actor of statement.actors) {
-					console.log(actor.session)
-					const sessionKeyActor = await unhashSession(actor.session);
-					actor.session = sessionKeyActor; 
-					const user = await User.findOne({ session_keys: actor.session, usr_type: 'student' });
-					actor.name = user.name;
+					const sessionKeyActor = await unhashSession(actor.sessionKey);
+					actor.sessionKey = sessionKeyActor;
+					
+					const user = await User.findOne({ session_keys: sessionKeyActor, usr_type: 'student' }, { name: 1, _id: 0 });
+					if (user) {
+						actor.name = user.name;
+					} else {
+						return res.status(404).json({ message: 'User not found' });
+					}
 
 					for (const record of actor.statements) {
 						if (record.context && record.context.extensions && record.context.extensions["https://www.jaxpi.com/sessionKey"]) {
@@ -127,6 +137,10 @@ router.get('/', checkAuthenticated, async (req, res) => {
 							}
 						}
 					}
+					actor.gameId = actor.statements[0].context.extensions["https://www.jaxpi.com/gameId"];
+					actor.gameName = actor.statements[0].context.extensions["https://www.jaxpi.com/gameName"];
+					actor.sessionId = actor.statements[0].context.extensions["https://www.jaxpi.com/sessionId"];
+					actor.sessionName = actor.statements[0].context.extensions["https://www.jaxpi.com/sessionName"];
 				}
             }
 			io.emit('teacherData', statements);
@@ -288,6 +302,9 @@ router.post('/', verifyToken, async (req, res) => {
             // Override context
             statement.context.instructor = { name: user.name, mbox: user.email };
 			statement.context.extensions["https://www.jaxpi.com/gameId"] = game.id;
+			statement.context.extensions["https://www.jaxpi.com/gameName"] = game.name;
+			statement.context.extensions["https://www.jaxpi.com/sessionId"] = session.sessionId;
+			statement.context.extensions["https://www.jaxpi.com/sessionName"] = session.sessionName;
             statement.context.contextActivities.parent = { id: group.id.toString() };
             statement.context.contextActivities.grouping = { id: group.institution };
 

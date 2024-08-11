@@ -38,7 +38,10 @@ const recordSchema = new mongoose.Schema({
 		extensions: { 
 			type: Object,
 			"https://www.jaxpi.com/gameId": { type: String },
-			"https://www.jaxpi.com/sessionKey": { type: String }
+			"https://www.jaxpi.com/gameName": { type: String },
+			"https://www.jaxpi.com/sessionKey": { type: String },
+			"https://www.jaxpi.com/sessionId": { type: String },
+			"https://www.jaxpi.com/sessionName": { type: String }
 		}
 	},
 	timestamp: { type: Date, required: true },
