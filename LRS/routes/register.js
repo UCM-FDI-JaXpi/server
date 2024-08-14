@@ -80,10 +80,9 @@ router.post('/', async (req, res) => {
 			institution: usr_type === 'teacher' ? institution : undefined });
         await newUser.save();
 
-		res.redirect(process.env.SERVER_URL + ':' + process.env.FRONTPORT + '/login');
-
+        res.status(200).json({ message: 'Registration successful' });
     } catch (error) {
-		res.redirect(process.env.SERVER_URL + ':' + process.env.FRONTPORT + '/register');
+        res.status(500).json({ message: 'Registration failed' });
     }
 });
 

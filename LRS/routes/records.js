@@ -31,12 +31,10 @@ router.get('/', checkAuthenticated, async (req, res) => {
 	const userType = getUserType(req);
 	if (userType === 'student') {
 		try {
-			const mbox = 'mailto:' + req.user.email;
 			// Gets all statements from a student
 			const statements = await Record.find({
 				$or: [
-					{ 'actor.name': req.user.name },
-					{ 'actor.mbox': mbox }
+					{ 'actor.name': req.user.name }
 				]
 			});
 
@@ -58,8 +56,6 @@ router.get('/', checkAuthenticated, async (req, res) => {
 	}
 	else if (userType === 'teacher') {
 		try {
-			const mbox = 'mailto:' + req.user.email;
-
 			/*
 			Get all statements of a teacher grouped by context.contextActivities.parent. 
 			Then it creates a field "actors", as a set ($addToSet) of all actor names, 
@@ -69,8 +65,7 @@ router.get('/', checkAuthenticated, async (req, res) => {
 				{
 					$match: {
 						$or: [
-							{ 'context.instructor.name': req.user.name },
-							{ 'context.instructor.mbox': mbox }
+							{ 'context.instructor.name': req.user.name }
 						]
 					}
 				},
@@ -138,9 +133,20 @@ router.get('/', checkAuthenticated, async (req, res) => {
 						}
 					}
 					actor.gameId = actor.statements[0].context.extensions["https://www.jaxpi.com/gameId"];
-					actor.gameName = actor.statements[0].context.extensions["https://www.jaxpi.com/gameName"];
+					const game = await Game.findOne({ id: actor.gameId }, { name: 1, _id: 0 });
+					if (game){
+						actor.gameName = game.name;
+					} else {
+						return res.status(404).json({ message: 'Game not found' });
+					}
+					
 					actor.sessionId = actor.statements[0].context.extensions["https://www.jaxpi.com/sessionId"];
-					actor.sessionName = actor.statements[0].context.extensions["https://www.jaxpi.com/sessionName"];
+					const gameSession = await GameSession.findOne({ sessionId: actor.sessionId  }, { sessionName: 1, _id: 0 });
+					if (gameSession){
+						actor.sessionName = gameSession.sessionName;
+					} else {
+						return res.status(404).json({ message: 'Game session not found' });
+					}
 				}
             }
 			io.emit('teacherData', statements);
@@ -302,15 +308,9 @@ router.post('/', verifyToken, async (req, res) => {
             // Override context
             statement.context.instructor = { name: user.name, mbox: user.email };
 			statement.context.extensions["https://www.jaxpi.com/gameId"] = game.id;
-			statement.context.extensions["https://www.jaxpi.com/gameName"] = game.name;
 			statement.context.extensions["https://www.jaxpi.com/sessionId"] = session.sessionId;
-			statement.context.extensions["https://www.jaxpi.com/sessionName"] = session.sessionName;
             statement.context.contextActivities.parent = { id: group.id.toString() };
             statement.context.contextActivities.grouping = { id: group.institution };
-
-			// Emit new statement
-			const newRecordUnhashed = new Record(statement);
-			io.emit('newStatement', newRecordUnhashed);
 
             // Hash sessionKey
             const salt = Number(process.env.SESSION_SALT);
@@ -320,7 +320,23 @@ router.post('/', verifyToken, async (req, res) => {
             // Store statement
             const newRecord = new Record(statement);
             await newRecord.save();
-            
+
+			// To front
+			statement.context.extensions["https://www.jaxpi.com/sessionKey"] = sessionKey;
+			statement.context.extensions["https://www.jaxpi.com/gameName"] = game.name;
+			statement.context.extensions["https://www.jaxpi.com/sessionName"] = session.sessionName;
+
+			const student = await User.findOne({ session_keys: sessionKey }, { name: 1, _id: 0 });
+			if (!student) {
+				return res.status(404).json({ message: 'Student not found' });
+			}
+			statement.context.extensions["https://www.jaxpi.com/studentName"] = student.name;
+
+            // Emit new statement
+			console.log(statement);
+			const newRecordUnhashed = new Record(statement);
+			io.emit('newStatement', newRecordUnhashed);
+
             res.status(201).json(newRecordUnhashed);
         } catch (err) {
             res.status(500).json({ message: err.message });
