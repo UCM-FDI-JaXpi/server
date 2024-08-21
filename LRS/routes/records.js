@@ -12,6 +12,7 @@ const User = require('../models/user');
 const Group = require('../models/group');
 const { checkAuthenticated, getUserType } = require('../index');
 const { io } = require('../index');
+const { getStudentByUsername } = require('../student');
 
 // Helper function to unhash session
 async function unhashSession(sessionHash) {
@@ -32,11 +33,7 @@ router.get('/', checkAuthenticated, async (req, res) => {
 	if (userType === 'student') {
 		try {
 			// Gets all statements from a student
-			const statements = await Record.find({
-				$or: [
-					{ 'actor.name': req.user.name }
-				]
-			});
+			const statements = await Record.find({ 'context.extensions.https://www.jaxpi.com/studentName': req.user.name });
 
 			for (const statement of statements) {
                 if (statement.context && statement.context.extensions && statement.context.extensions["https://www.jaxpi.com/sessionKey"]) {
