@@ -70,10 +70,10 @@ io.on('connection', (socket) => {
 		console.log('Sockets: ', io.sockets.sockets);
 	});
 
-	socket.on('message', (data) => {
-        console.log('Message received:', data);
-        io.emit('message', 'Message received by server');
-    });
+	// socket.on('message', (data) => {
+    //     console.log('Message received:', data);
+    //     io.emit('message', 'Message received by server');
+    // });
 
 	socket.on('disconnect', () => {
 		console.log('User disconnected');

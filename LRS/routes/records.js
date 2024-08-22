@@ -12,7 +12,7 @@ const User = require('../models/user');
 const Group = require('../models/group');
 const { checkAuthenticated, getUserType } = require('../index');
 const { io } = require('../index');
-const { getStudentByUsername } = require('../student');
+const { getStudentByUsername } = require('./student');
 
 // Helper function to unhash session
 async function unhashSession(sessionHash) {
@@ -32,21 +32,96 @@ router.get('/', checkAuthenticated, async (req, res) => {
 	const userType = getUserType(req);
 	if (userType === 'student') {
 		try {
-			// Gets all statements from a student
-			const statements = await Record.find({ 'context.extensions.https://www.jaxpi.com/studentName': req.user.name });
+			const group = await Group.findOne({ students: { $in: [req.user.name] } }, { id:1, name: 1, teacher: 1, _id: 0 }); // `group` aquí será un objeto con los campos id, name y teacher
+			if (group){ // Agrupa los statements del estudiante usando el groupId y el teacherName
+                const statements = await Record.aggregate([
+                    {
+                        $match: {
+                            'context.contextActivities.parent.id': group.id,
+                            'context.instructor.name': group.teacher
+                        }
+                    },
+					{
+						$group: {
+							_id: {
+								parent: '$context.contextActivities.parent.id',
+								sessionKey: {
+									$getField: {
+										field: "https://www.jaxpi.com/sessionKey",
+										input: "$context.extensions"
+									}
+								}
+							},
+							statements: { $push: '$$ROOT' }
+						}
+					},
+					{
+						$group: {
+							_id: '$_id.parent',
+							actors: {
+								$push: {
+									sessionKey: '$_id.sessionKey',
+									statements: '$statements'
+								}
+							}
+						}
+					},
+					{
+						$project: {
+							_id: 0,
+							  groupId: '$_id',
+							actors: 1
+						}
+					}
+                ]);
 
-			for (const statement of statements) {
-                if (statement.context && statement.context.extensions && statement.context.extensions["https://www.jaxpi.com/sessionKey"]) {
-                    const sessionHash = statement.context.extensions["https://www.jaxpi.com/sessionKey"];
-                    const sessionKey = await unhashSession(sessionHash);
-                    if (sessionKey) {
-                        statement.context.extensions["https://www.jaxpi.com/sessionKey"] = sessionKey;
-                    }
-                }
-            }
+				for (const statement of statements) {
+					statement.groupName = group.name;
+					statement.teacherName = group.teacher;
 
-			io.emit('studentData', statements);
-			res.json(statements);
+					for (const actor of statement.actors) {
+						const sessionKeyActor = await unhashSession(actor.sessionKey);
+						actor.sessionKey = sessionKeyActor;
+						
+						const user = await User.findOne({ session_keys: sessionKeyActor, usr_type: 'student' }, { name: 1, _id: 0 });
+						if (user) {
+							actor.name = user.name;
+						} else {
+							return res.status(404).json({ message: 'User not found' });
+						}
+	
+						for (const record of actor.statements) {
+							if (record.context && record.context.extensions && record.context.extensions["https://www.jaxpi.com/sessionKey"]) {
+								const sessionHash = record.context.extensions["https://www.jaxpi.com/sessionKey"];
+								const sessionKey = await unhashSession(sessionHash);
+								if (sessionKey) {
+									record.context.extensions["https://www.jaxpi.com/sessionKey"] = sessionKey;
+								}
+							}
+						}
+						actor.gameId = actor.statements[0].context.extensions["https://www.jaxpi.com/gameId"];
+						const game = await Game.findOne({ id: actor.gameId }, { name: 1, _id: 0 });
+						if (game){
+							actor.gameName = game.name;
+						} else {
+							return res.status(404).json({ message: 'Game not found' });
+						}
+						
+						actor.sessionId = actor.statements[0].context.extensions["https://www.jaxpi.com/sessionId"];
+						const gameSession = await GameSession.findOne({ sessionId: actor.sessionId  }, { sessionName: 1, _id: 0 });
+						if (gameSession){
+							actor.sessionName = gameSession.sessionName;
+						} else {
+							return res.status(404).json({ message: 'Game session not found' });
+						}
+					}
+					statement.actors = statement.actors.filter(actor => actor.name === req.user.name); // Nos quedamps con los que se llamen req.user.name
+				}
+				io.emit('studentData', statements);
+				res.json(statements);
+			} else {
+				return res.status(404).json({ message: 'Group not found' });
+			}
 		} catch (err) {
 			res.status(500).json({ message: err.message });
 		}
@@ -330,7 +405,8 @@ router.post('/', verifyToken, async (req, res) => {
 			statement.context.extensions["https://www.jaxpi.com/studentName"] = student.name;
 
             // Emit new statement
-			console.log(statement);
+			// console.log(statement);
+			console.log("Group name del statement posteado: ", group.name);
 			const newRecordUnhashed = new Record(statement);
 			io.emit('newStatement', newRecordUnhashed);
 

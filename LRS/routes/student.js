@@ -41,6 +41,7 @@ async function getStudentByUsername(username) {
 async function getStudentBySessionKey(sessionKey) {
 	try {
 		const student = await User.findOne({ session_keys: sessionKey });
+        console.log('studenttttttt',student)
 		if (!student) {
 			throw new Error('Student not found');
 		}
@@ -50,4 +51,4 @@ async function getStudentBySessionKey(sessionKey) {
 	}
 }
 
-module.exports = { router, getStudentBySessionKey, getStudentByUsername };
+module.exports = router;

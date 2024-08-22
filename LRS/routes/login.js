@@ -17,6 +17,7 @@ router.post('/', checkNotAuthenticated, async (req, res, next) => {
         if (sessionKey) {
             // Authenticate student using session keys
             user = await User.findOne({ session_keys: sessionKey, usr_type: 'student' });
+            console.log('userrrrrrrr',user)
             if (user) {
                 req.logIn(user, (err) => {
                     if (err) {
