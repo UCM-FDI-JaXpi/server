@@ -69,7 +69,7 @@ router.get('/', checkAuthenticated, async (req, res) => {
 					{
 						$project: {
 							_id: 0,
-							  groupId: '$_id',
+							groupId: '$_id',
 							actors: 1
 						}
 					}
@@ -240,20 +240,36 @@ router.get('/', checkAuthenticated, async (req, res) => {
 			}
 
 			const games = await Game.find({ developer: req.user.name });
-
+			const gameIds = games.map(game => game.id);
+			console.log("gameIds encontrados:", gameIds);
 			const statements = await Record.aggregate([
 				{ 
-					$match: { 
-						'context.extensions.https://www.jaxpi.com/gameId': { $in: games.map(game => game.id) } 
-					} 
+					$match: {
+						$expr: {
+							$in: [
+								{
+									$getField: {
+										field: "https://www.jaxpi.com/gameId",
+										input: "$context.extensions"
+									}
+								},
+								gameIds
+							]
+						}
+					}
 				},
 				{
-					$unset: ["actor.name", "actor.mbox", "context.instructor.name", "context.instructor.mbox"]
+					$unset: ["actor", "context.instructor", "context.contextActivities"]
 				},
 				{
 					$group: {
 						_id: {
-							parent: '$context.extensions.https://www.jaxpi.com/gameId',
+							parent: {
+								$getField: {
+									field: "https://www.jaxpi.com/gameId",
+									input: "$context.extensions"
+								}
+							},
 							sessionKey: {
 								$getField: {
 									field: "https://www.jaxpi.com/sessionKey",
@@ -277,13 +293,34 @@ router.get('/', checkAuthenticated, async (req, res) => {
 				},
 				{
 					$project: {
-						_id: 1,
+						_id: 0, 
+            			gameId: "$_id",
 						actors: 1,
-
 					}
 				}
 			]);
-
+			for (const statement of statements) {
+				for (const actor of statement.actors) {
+					const sessionKeyActor = await unhashSession(actor.sessionKey);
+					actor.sessionKey = sessionKeyActor; //////////////////aqui el original-hacer un pseudonimo al student
+					for (const record of actor.statements) {
+						if (record.context && record.context.extensions && record.context.extensions["https://www.jaxpi.com/sessionKey"]) {
+							const sessionHash = record.context.extensions["https://www.jaxpi.com/sessionKey"];
+							const sessionKey = await unhashSession(sessionHash);
+							if (sessionKey) {
+								record.context.extensions["https://www.jaxpi.com/sessionKey"] = sessionKey; ////aqui el original-hacer pseudonimo
+							}
+						}
+					}
+					actor.sessionId = actor.statements[0].context.extensions["https://www.jaxpi.com/sessionId"];
+					const gameSession = await GameSession.findOne({ sessionId: actor.sessionId  }, { sessionName: 1, _id: 0 });
+					if (gameSession){
+						actor.sessionName = gameSession.sessionName;
+					} else {
+						return res.status(404).json({ message: 'Game session not found' });
+					}
+				}
+			}
 			io.emit('devData', statements);
 			res.json(statements);
 
