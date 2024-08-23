@@ -248,18 +248,18 @@ router.get('/', checkAuthenticated, async (req, res) => {
 					} 
 				},
 				{
-					$addFields: {
-						'actor.pseudonym': generateRandomPseudonym(),
-					}
-				},
-				{
-					$unset: ["actor.name", "actor.mbox"]
+					$unset: ["actor.name", "actor.mbox", "context.instructor.name", "context.instructor.mbox"]
 				},
 				{
 					$group: {
 						_id: {
-							parent: '$context.contextActivities.parent',
-							studentName: '$actor.pseudonym' // Group by pseudonym
+							parent: '$context.extensions.https://www.jaxpi.com/gameId',
+							sessionKey: {
+								$getField: {
+									field: "https://www.jaxpi.com/sessionKey",
+									input: "$context.extensions"
+								}
+							}
 						},
 						statements: { $push: '$$ROOT' }
 					}
@@ -269,7 +269,7 @@ router.get('/', checkAuthenticated, async (req, res) => {
 						_id: '$_id.parent',
 						actors: {
 							$push: {
-								studentName: '$_id.studentName',
+								sessionKey: '$_id.sessionKey',
 								statements: '$statements'
 							}
 						}
@@ -278,7 +278,8 @@ router.get('/', checkAuthenticated, async (req, res) => {
 				{
 					$project: {
 						_id: 1,
-						actors: 1
+						actors: 1,
+
 					}
 				}
 			]);
