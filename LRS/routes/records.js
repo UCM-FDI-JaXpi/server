@@ -239,7 +239,14 @@ router.get('/', checkAuthenticated, async (req, res) => {
 				return pseudonym;
 			}
 
+			const games = await Game.find({ developer: req.user.name });
+
 			const statements = await Record.aggregate([
+				{ 
+					$match: { 
+						'context.extensions.https://www.jaxpi.com/gameId': { $in: games.map(game => game.id) } 
+					} 
+				},
 				{
 					$addFields: {
 						'actor.pseudonym': generateRandomPseudonym(),
@@ -285,50 +292,6 @@ router.get('/', checkAuthenticated, async (req, res) => {
 	}
 	else {
 		res.status(500).json({ message: 'Error finding user type' });
-	}
-});
-
-// Getting all statements from a specific user
-router.get('/:uname', checkAuthenticated, async (req, res) => {
-	const userType = getUserType(req);
-	if (userType === 'student') {
-		if (uname === req.user.name) {
-			try {
-				// Gets all statements from a student
-				const statements = await Record.find({ 'actor.name': uname });
-
-				io.emit('studentData', statements);
-				res.json(statements);
-			} catch (err) {
-				res.status(500).json({ message: err.message });
-			}
-		}
-		else {
-			res.status(403).json({ message: 'Forbidden' });
-		}
-	}
-	if (userType === 'teacher') {
-		if (uname === req.user.name) {
-			try {
-				const statements = await Record.find({
-					$and: [
-						{ 'context.instructor.name': req.user.name },
-						{ 'actor.name': uname }
-					]
-				});
-
-				io.emit('studentData', statements);
-				res.json(statements);
-			} catch (err) {
-				res.status(500).json({ message: err.message });
-			}
-		}
-		else {
-			res.status(403).json({ message: 'Forbidden' });
-		}
-	}
-	if (userType === 'dev') {
-		res.status(403).json({ message: 'Forbidden' });
 	}
 });
 
