@@ -33,21 +33,19 @@ router.get('/get-game-sessions/:studentName', async (req, res) => {
     const { studentName } = req.params;
 	try {
 		const gamesessions = await GameSession.find({
-            'students': {
-                $elemMatch: {
-                    name: studentName
-                }
-            }
-        }).select(' sessionId sessionName gameId groupId createdAt');
+            'students.name': studentName
+        }).select(' sessionId sessionName gameId groupId createdAt students.$'); // Usamos proyeccion
         if (gamesessions.length === 0) {
             return res.status(404).json({ message: 'No game sessions found for this student' });
         }
         // Devolver a student solo datos necesarios
         const gameSessionsWithSomeDetails = await Promise.all(gamesessions.map(async (session) => {
             const game = await Game.findOne({ id: session.gameId }).select('name'); 
+            const student = session.students[0];
             return {
                 sessionId: session.sessionId,
                 sessionName: session.sessionName,
+                key: student.key,
                 gameName: game ? game.name : 'Unknown Game',
                 createdAt: session.createdAt
             };
