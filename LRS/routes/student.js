@@ -2,6 +2,9 @@ const express = require('express');
 
 const router = express.Router();
 const User = require('../models/user');
+const GameSession = require('../models/gamesession');
+const Group = require('../models/group');
+const Game = require('../models/game');
 
 // GET request to retrieve students by session key
 router.get('/:sessionKey', async (req, res) => {
@@ -24,6 +27,35 @@ router.get('/:username', async (req, res) => {
     } catch (err) {
         res.status(404).json({ message: err.message });
     }
+});
+
+router.get('/get-game-sessions/:studentName', async (req, res) => {
+    const { studentName } = req.params;
+	try {
+		const gamesessions = await GameSession.find({
+            'students': {
+                $elemMatch: {
+                    name: studentName
+                }
+            }
+        }).select(' sessionId sessionName gameId groupId createdAt');
+        if (gamesessions.length === 0) {
+            return res.status(404).json({ message: 'No game sessions found for this student' });
+        }
+        // Devolver a student solo datos necesarios
+        const gameSessionsWithSomeDetails = await Promise.all(gamesessions.map(async (session) => {
+            const game = await Game.findOne({ id: session.gameId }).select('name'); 
+            return {
+                sessionId: session.sessionId,
+                sessionName: session.sessionName,
+                gameName: game ? game.name : 'Unknown Game',
+                createdAt: session.createdAt
+            };
+        }));
+		res.status(200).json(gameSessionsWithSomeDetails);
+	} catch (error) {
+		res.status(500).json({ message: error.message });
+	}
 });
 
 async function getStudentByUsername(username) {
