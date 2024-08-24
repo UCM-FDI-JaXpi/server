@@ -302,14 +302,12 @@ router.get('/', checkAuthenticated, async (req, res) => {
 			for (const statement of statements) {
 				for (const actor of statement.actors) {
 					const sessionKeyActor = await unhashSession(actor.sessionKey);
-					actor.sessionKey = sessionKeyActor; //////////////////aqui el original-hacer un pseudonimo al student
+					const student = await User.findOne({ session_keys: sessionKeyActor }, { name: 1, _id: 0 });
+					const pseudonym = crypto.createHash('md5').update(student.name).digest('hex').slice(0, 5);
+					actor.sessionKey = pseudonym;
 					for (const record of actor.statements) {
 						if (record.context && record.context.extensions && record.context.extensions["https://www.jaxpi.com/sessionKey"]) {
-							const sessionHash = record.context.extensions["https://www.jaxpi.com/sessionKey"];
-							const sessionKey = await unhashSession(sessionHash);
-							if (sessionKey) {
-								record.context.extensions["https://www.jaxpi.com/sessionKey"] = sessionKey; ////aqui el original-hacer pseudonimo
-							}
+							record.context.extensions["https://www.jaxpi.com/sessionKey"] = pseudonym;
 						}
 					}
 					actor.sessionId = actor.statements[0].context.extensions["https://www.jaxpi.com/sessionId"];
