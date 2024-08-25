@@ -58,7 +58,7 @@ router.patch('/games/:id', getGame, async (req, res) => {
 // Delete a game
 router.delete('/games/:id', getGame, async (req, res) => {
 	try {
-		await res.game.deleteOne();
+		await res.game.deleteOne({ id: req.params.id });
 		res.status(200).json({ message: 'Deleted Game' });
 	} catch (err) {
 		res.status(500).json({ message: err.message });
