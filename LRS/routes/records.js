@@ -392,7 +392,7 @@ router.post('/', verifyToken, async (req, res) => {
             const newRecord = new Record(statement);
             await newRecord.save();
 
-			// To front
+			//----------------------------------- TO FRONT TEACHER AND STUDENT
 			statement.context.extensions["https://www.jaxpi.com/sessionKey"] = sessionKey;
 			statement.context.extensions["https://www.jaxpi.com/gameName"] = game.name;
 			statement.context.extensions["https://www.jaxpi.com/sessionName"] = session.sessionName;
@@ -403,11 +403,28 @@ router.post('/', verifyToken, async (req, res) => {
 			}
 			statement.context.extensions["https://www.jaxpi.com/studentName"] = student.name;
 
-            // Emit new statement
-			// console.log(statement);
+			// Emit new statement
 			console.log("Group name del statement posteado: ", group.name);
 			const newRecordUnhashed = new Record(statement);
 			io.emit('newStatement', newRecordUnhashed);
+
+			//----------------------------------- TO FRONT DEV
+			const studentToDev = await User.findOne({ session_keys: sessionKey }, { name: 1, _id: 0 });
+			const pseudonym = crypto.createHash('md5').update(studentToDev.name).digest('hex').slice(0, 5);
+			statement.actor = null;
+			statement.context.instructor = null;
+			statement.context.contextActivities = null;
+			statement.context.extensions["https://www.jaxpi.com/sessionKey"] = pseudonym;
+			statement.context.extensions["https://www.jaxpi.com/gameName"] = null;
+			statement.context.extensions["https://www.jaxpi.com/sessionName"] = null;
+			statement.context.extensions["https://www.jaxpi.com/studentName"] = null;
+			const newRecordUnhashedToDev = {
+				sessionKey: pseudonym,
+				statement: statement,
+				sessionId: statement.context.extensions["https://www.jaxpi.com/sessionId"]
+			};
+			io.emit('devDataPost', newRecordUnhashedToDev);
+
 
             res.status(201).json(newRecordUnhashed);
         } catch (err) {
