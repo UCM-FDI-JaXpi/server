@@ -333,7 +333,7 @@ router.get('/', checkAuthenticated, async (req, res) => {
 
 // Post token verification middleware
 const verifyToken = async (req, res, next) => {
-    const token = req.headers['x-authentication'];
+    const token = req.headers['x-authentication'] || req.query.auth || req.body.auth;
     if (!token) {
         return res.status(403).json({ message: 'No token provided' });
     }
